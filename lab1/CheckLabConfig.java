@@ -77,11 +77,7 @@ public class CheckLabConfig {
 		String yourOS = System.getProperty("os.name").toLowerCase();
 		String yourOSVersion = System.getProperty("os.version");
 
-		if (yourOS.contains("windows")) {
-			checkConfig(true);
-		} else {
-			checkConfig(false);
-		}
+		checkConfig(yourOS.contains("windows"));
 
 		/*if (yourOS.contains("mac")) {
 			if (yourOSVersion.contains("10.15")) {
