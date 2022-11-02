@@ -113,6 +113,28 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+        int lastSlotPerColumn = 0;
+        int lastColumn = 0;
+        for (Tile tile : board) {
+            if (tile == null) {
+                continue;
+            }
+            int col = tile.col();
+            int row = tile.row();
+            if (col != lastColumn) {
+                lastSlotPerColumn = 0;
+                continue;
+            }
+            if (row != lastSlotPerColumn) {
+                if (tile.value() != board.tile(col, lastSlotPerColumn).value()) {
+                    board.move(col, lastSlotPerColumn + 1, tile);
+                    lastSlotPerColumn++;
+                } else {
+                    board.move(col, lastSlotPerColumn, tile);
+                }
+                changed = true;
+            }
+        }
 
         checkGameOver();
         if (changed) {
@@ -137,7 +159,11 @@ public class Model extends Observable {
      *  Empty spaces are stored as null.
      * */
     public static boolean emptySpaceExists(Board b) {
-        // TODO: Fill in this function.
+        for (Tile tile : b) {
+            if (tile == null) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -147,7 +173,11 @@ public class Model extends Observable {
      * given a Tile object t, we get its value with t.value().
      */
     public static boolean maxTileExists(Board b) {
-        // TODO: Fill in this function.
+        for (Tile tile : b) {
+            if (tile != null && tile.value() == MAX_PIECE) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -158,7 +188,27 @@ public class Model extends Observable {
      * 2. There are two adjacent tiles with the same value.
      */
     public static boolean atLeastOneMoveExists(Board b) {
-        // TODO: Fill in this function.
+        int size = b.size();
+        for (Tile tile : b) {
+            if (tile == null) {
+                return true;
+            }
+
+            int col = tile.col();
+            int row = tile.row();
+            if (col % (size - 1) != 0) {
+                Tile right = b.tile(col + 1, row);
+                if (right.value() == tile.value()) {
+                    return true;
+                }
+            }
+            if (row % (size - 1) != 0) {
+                Tile button = b.tile(col, row + 1);
+                if (button.value() == tile.value()) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 

@@ -30,6 +30,7 @@ public class TestUpOnly extends TestUtils {
         model = new Model(before, 0, 0, false);
         String prevBoard = model.toString();
         boolean changed = model.tilt(Side.NORTH);
+        System.out.println(model);
         checkChanged(Side.NORTH, true, changed);
         checkModel(after, 0, 0, prevBoard, Side.NORTH);
     }
