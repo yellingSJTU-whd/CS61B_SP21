@@ -113,32 +113,53 @@ public class Model extends Observable {
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
-        int lastSlotPerColumn = 0;
-        int lastColumn = 0;
-        for (Tile tile : board) {
-            if (tile == null) {
-                continue;
-            }
-            int col = tile.col();
-            int row = tile.row();
-            if (col != lastColumn) {
-                lastSlotPerColumn = 0;
-                continue;
-            }
-            if (row != lastSlotPerColumn) {
-                if (tile.value() != board.tile(col, lastSlotPerColumn).value()) {
-                    board.move(col, lastSlotPerColumn + 1, tile);
-                    lastSlotPerColumn++;
-                } else {
-                    board.move(col, lastSlotPerColumn, tile);
-                }
-                changed = true;
-            }
+        board.setViewingPerspective(side);
+        for (int col = 0; col < size(); col++) {
+            changed = changed || tiltSingleColumn(col);
         }
-
+        board.setViewingPerspective(Side.NORTH);
         checkGameOver();
         if (changed) {
             setChanged();
+        }
+        return changed;
+    }
+
+    private boolean tiltSingleColumn(int col) {
+        boolean changed = false;
+        int lastRow = size() - 1;
+        Tile lastMergedTile = null;
+        for (int row = size() - 1; row >= 0; row--) {
+            if (board.tile(col, row) == null) {
+                continue;
+            }
+            if (lastRow > row) {
+                Tile curr = board.tile(col, row);
+                Tile last = board.tile(col, lastRow);
+                //moving into empty slot
+                if (last == null) {
+                    board.move(col, lastRow, curr);
+                }
+                //moving into the slot button to lastRow
+                else if (last.value() != curr.value()) {
+                    board.move(col, lastRow - 1, curr);
+                    lastRow--;
+                }
+                //merge
+                else if (last != lastMergedTile) {
+                    System.out.printf("DEBUG: col = %s, row = %s, board = %s%n", col, row, board);
+                    board.move(col, lastRow, curr);
+                    lastMergedTile = board.tile(col, lastRow);
+                    score += lastMergedTile.value();
+                }
+                //can't merge
+                else {
+                    board.move(col, lastRow - 1, curr);
+                    lastRow--;
+                }
+                changed = true;
+            }
+
         }
         return changed;
     }
@@ -198,13 +219,13 @@ public class Model extends Observable {
             int row = tile.row();
             if (col % (size - 1) != 0) {
                 Tile right = b.tile(col + 1, row);
-                if (right.value() == tile.value()) {
+                if (right == null || right.value() == tile.value()) {
                     return true;
                 }
             }
             if (row % (size - 1) != 0) {
-                Tile button = b.tile(col, row + 1);
-                if (button.value() == tile.value()) {
+                Tile up = b.tile(col, row + 1);
+                if (up == null || up.value() == tile.value()) {
                     return true;
                 }
             }
