@@ -9,6 +9,9 @@ public class IntListExercises {
      * @param lst IntList from Lecture
      */
     public static void addConstant(IntList lst, int c) {
+        if (lst == null) {
+            return;
+        }
         IntList head = lst;
         while (head.rest != null) {
             head.first += c;
