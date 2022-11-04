@@ -24,7 +24,7 @@ public class TimeAList {
     public static void timeAListConstruction() {
         var counter = new AList<Integer>();
         int i = 1;
-        while (i <= 128) {
+        while (i <= Math.pow(2, 7)) {
             counter.addLast(i * 1000);
             i *= 2;
         }
