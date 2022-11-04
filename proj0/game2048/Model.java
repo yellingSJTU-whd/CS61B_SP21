@@ -115,7 +115,7 @@ public class Model extends Observable {
         // changed local variable to true.
         board.setViewingPerspective(side);
         for (int col = 0; col < size(); col++) {
-            changed = changed || tiltSingleColumn(col);
+            changed = tiltSingleColumn(col) || changed;
         }
         board.setViewingPerspective(Side.NORTH);
         checkGameOver();
@@ -147,7 +147,6 @@ public class Model extends Observable {
                 }
                 //merge
                 else if (last != lastMergedTile) {
-                    System.out.printf("DEBUG: col = %s, row = %s, board = %s%n", col, row, board);
                     board.move(col, lastRow, curr);
                     lastMergedTile = board.tile(col, lastRow);
                     score += lastMergedTile.value();
