@@ -4,8 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.Objects;
-
-import static java.util.stream.IntStream.range;
+import java.util.stream.IntStream;
 
 public class LinkedListDeque<T> implements Deque<T> {
     private final Node<T> sentinel;
@@ -52,8 +51,8 @@ public class LinkedListDeque<T> implements Deque<T> {
     @Override
     public void printDeque() {
         var builder = new StringBuilder();
-        for (T t : this) {
-            builder.append(t).append(" ");
+        for (T item : this) {
+            builder.append(item).append(" ");
         }
         System.out.println(builder.toString().trim());
         System.out.println();
@@ -116,9 +115,17 @@ public class LinkedListDeque<T> implements Deque<T> {
         return new DequeIterator();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean equals(Object o) {
-        return false;
+        if (!(o instanceof Deque)) {
+            return false;
+        }
+        var that = (Deque<T>) o;
+        if (size != that.size()) {
+            return false;
+        }
+        return IntStream.range(0, size).noneMatch(i -> get(i) != that.get(i));
     }
 
     private static class Node<T> {
@@ -161,10 +168,10 @@ public class LinkedListDeque<T> implements Deque<T> {
                 return null;
             }
             if (index < size / 2) {
-                range(0, index - 1).forEach(i -> cursor = cursor.next);
+                IntStream.range(0, index - 1).forEach(i -> cursor = cursor.next);
                 return next();
             }
-            range(0, size - index - 1).forEach(i -> cursor = cursor.pre);
+            IntStream.range(0, size - index - 1).forEach(i -> cursor = cursor.pre);
             return pre();
         }
     }

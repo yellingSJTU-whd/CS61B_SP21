@@ -18,8 +18,6 @@ public interface Deque<T> extends Iterable<T> {
         return size() == 0;
     }
 
-    ;
-
     public int size();
 
     public void printDeque();
@@ -34,5 +32,4 @@ public interface Deque<T> extends Iterable<T> {
     public Iterator<T> iterator();
 
     public boolean equals(Object o);
-
 }
