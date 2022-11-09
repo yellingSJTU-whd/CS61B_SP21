@@ -111,7 +111,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public boolean isEmpty() {
-        return head == tail;
+        return head == tail && items[head] == null;
     }
 
     @Override
@@ -156,7 +156,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
      * Double the capacity of this deque, if it is full.
      */
     private void growIfDequeFull() {
-        if (head == inc(tail, items.length)) {
+        if (head == tail && items[head] != null) {
             resize(items.length * 2);
         }
     }

@@ -85,6 +85,10 @@ public class LinkedListDequeTest {
         String s = lld1.removeFirst();
         double d = lld2.removeFirst();
         boolean b = lld3.removeFirst();
+
+        assertEquals("string", s);
+        assertEquals(3.14159,d,10e-7);
+        assertTrue(b);
     }
 
     @Test
