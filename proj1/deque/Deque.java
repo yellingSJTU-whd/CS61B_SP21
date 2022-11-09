@@ -2,11 +2,9 @@ package deque;
 
 import java.util.Iterator;
 
-public interface Deque<T> extends Iterable<T> {
+public interface Deque<T> {
     /**
      * AInsert the specified item at the front of this deque.
-     *
-     * @param item - the item to add
      */
     public void addFirst(T item);
 
@@ -25,9 +23,6 @@ public interface Deque<T> extends Iterable<T> {
     public T removeLast();
 
     public T get(int index);
-
-    @Override
-    public Iterator<T> iterator();
 
     public boolean equals(Object o);
 }

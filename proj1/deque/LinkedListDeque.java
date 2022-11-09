@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-public class LinkedListDeque<T> implements Deque<T> {
+public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private final Node<T> sentinel;
 
     private int size;
