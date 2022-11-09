@@ -40,19 +40,21 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     @Override
     public void addFirst(T item) {
         Objects.requireNonNull(item);
-        growIfDequeFull();
 
         head = dec(head, items.length);
         items[head] = item;
+
+        growIfDequeFull();
     }
 
     @Override
     public void addLast(T item) {
         Objects.requireNonNull(item);
-        growIfDequeFull();
 
         items[tail] = item;
         tail = inc(tail, items.length);
+
+        growIfDequeFull();
     }
 
     /**
@@ -61,14 +63,14 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     @SuppressWarnings("unchecked")
     private void resize(int capacity) {
         T[] resized = (T[]) new Object[capacity];
-        if (tail < head) {
+        if (head < tail) {
+            System.arraycopy(items, head, resized, 0, tail - head);
+        } else {
             System.arraycopy(items, head, resized, 0, items.length - head);
             System.arraycopy(items, 0, resized, items.length - head, tail);
-        } else {
-            System.arraycopy(items, head, resized, 0, tail - head);
         }
-        head = 0;
         tail = size();
+        head = 0;
         items = resized;
     }
 
@@ -106,7 +108,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public int size() {
-        return sub(tail, head, items.length);
+        return head == tail ? items[head] == null ? 0 : items.length : sub(tail, head, items.length);
     }
 
     @Override
@@ -200,5 +202,14 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return false;
         }
         return IntStream.range(0, size()).noneMatch(i -> get(i) != that.get(i));
+    }
+
+    @Override
+    public String toString() {
+        var builder = new StringBuilder();
+        for (T item : this) {
+            builder.append(item).append(" ");
+        }
+        return builder.toString().trim();
     }
 }
