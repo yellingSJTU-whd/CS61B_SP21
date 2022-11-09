@@ -40,21 +40,19 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     @Override
     public void addFirst(T item) {
         Objects.requireNonNull(item);
+        growIfDequeFull();
 
         head = dec(head, items.length);
         items[head] = item;
-
-        growIfDequeFull();
     }
 
     @Override
     public void addLast(T item) {
         Objects.requireNonNull(item);
+        growIfDequeFull();
 
         items[tail] = item;
         tail = inc(tail, items.length);
-
-        growIfDequeFull();
     }
 
     /**
