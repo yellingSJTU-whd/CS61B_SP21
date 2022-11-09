@@ -112,11 +112,6 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     }
 
     @Override
-    public boolean isEmpty() {
-        return head == tail && items[head] == null;
-    }
-
-    @Override
     public void printDeque() {
         var builder = new StringBuilder();
         for (T item : this) {
@@ -202,14 +197,5 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return false;
         }
         return IntStream.range(0, size()).noneMatch(i -> get(i) != that.get(i));
-    }
-
-    @Override
-    public String toString() {
-        var builder = new StringBuilder();
-        for (T item : this) {
-            builder.append(item).append(" ");
-        }
-        return builder.toString().trim();
     }
 }

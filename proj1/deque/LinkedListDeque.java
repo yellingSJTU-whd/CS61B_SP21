@@ -37,11 +37,6 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     }
 
     @Override
-    public boolean isEmpty() {
-        return sentinel.next == sentinel;
-    }
-
-    @Override
     public int size() {
         return size;
     }
