@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
+import static java.lang.Math.floorMod;
+
 public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private final Node<T> sentinel;
 
@@ -90,11 +92,11 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         if (index > size - 1) {
             return null;
         }
-        return getRecursive(sentinel, index);
+        return getRecursive(sentinel.next, index);
     }
 
     private T getRecursive(Node<T> node, int index) {
-        if (index % size == 0) {
+        if (floorMod(index, size) == 0) {
             return node.item;
         }
         if (index < size / 2) {
@@ -111,6 +113,9 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     @SuppressWarnings("unchecked")
     @Override
     public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
         if (!(o instanceof Deque)) {
             return false;
         }
@@ -118,7 +123,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         if (size != that.size()) {
             return false;
         }
-        return IntStream.range(0, size).noneMatch(i -> get(i) != that.get(i));
+        return IntStream.range(0, size).allMatch(i -> get(i).equals(that.get(i)));
     }
 
     private static class Node<T> {

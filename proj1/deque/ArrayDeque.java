@@ -96,19 +96,33 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     /**
      * Subtracts j from i, mod modulus.
-     * The return value is equals to circular distance between i and j.
+     * The return value is equals to circular distance between a and b.
      */
-    private static int sub(int i, int j, int modulus) {
-        i -= j;
-        if (i < 0) {
-            i += modulus;
+    private static int sub(int a, int b, int modulus) {
+        a -= b;
+        if (a < 0) {
+            a += modulus;
         }
-        return i;
+        return a;
+    }
+
+    private static int add(int a, int b, int modulus) {
+        a += b;
+        if (a >= modulus) {
+            a -= modulus;
+        }
+        return a;
     }
 
     @Override
     public int size() {
-        return head == tail ? items[head] == null ? 0 : items.length : sub(tail, head, items.length);
+        if (head == tail) {
+            if (items[head] == null) {
+                return 0;
+            }
+            return items.length;
+        }
+        return sub(tail, head, items.length);
     }
 
     @Override
@@ -174,7 +188,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         if (index > size() - 1) {
             return null;
         }
-        return items[head + index];
+        return items[add(head, index, items.length)];
     }
 
     @Override
@@ -189,6 +203,9 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     @SuppressWarnings("unchecked")
     @Override
     public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
         if (!(o instanceof Deque)) {
             return false;
         }
@@ -196,6 +213,6 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         if (size() != that.size()) {
             return false;
         }
-        return IntStream.range(0, size()).noneMatch(i -> get(i) != that.get(i));
+        return IntStream.range(0, size()).allMatch(i -> get(i).equals(that.get(i)));
     }
 }

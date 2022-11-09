@@ -87,7 +87,7 @@ public class LinkedListDequeTest {
         boolean b = lld3.removeFirst();
 
         assertEquals("string", s);
-        assertEquals(3.14159,d,10e-7);
+        assertEquals(3.14159, d, 10e-7);
         assertTrue(b);
     }
 
@@ -117,5 +117,12 @@ public class LinkedListDequeTest {
         for (double i = 999999; i > 500000; i--) {
             assertEquals("Should have the same value", i, (double) lld1.removeLast(), 0.0);
         }
+    }
+
+    @Test
+    public void test_add_and_get() {
+        var deque = new LinkedListDeque<Integer>();
+        deque.addFirst(2);
+        assertEquals(2, deque.getRecursive(0).intValue());
     }
 }

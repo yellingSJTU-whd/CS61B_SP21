@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.util.stream.IntStream;
 
+import static java.lang.Math.floorMod;
 import static org.junit.Assert.assertEquals;
 
 public class ArrayDequeTest {
@@ -23,5 +24,33 @@ public class ArrayDequeTest {
             var item = deque.removeFirst();
             assertEquals(i, item.intValue());
         });
+    }
+
+    @Test
+    public void test_add_and_get() {
+        System.out.printf(" floor mod: %s%n", floorMod(12,10));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }
