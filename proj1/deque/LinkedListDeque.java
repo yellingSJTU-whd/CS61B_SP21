@@ -1,7 +1,5 @@
 package deque;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -19,7 +17,7 @@ public class LinkedListDeque<T> implements Deque<T> {
     }
 
     @Override
-    public void addFirst(@NotNull T item) {
+    public void addFirst(T item) {
         Objects.requireNonNull(item);
         var second = sentinel.next;
         var first = new Node<>(item, sentinel, second);
@@ -29,7 +27,7 @@ public class LinkedListDeque<T> implements Deque<T> {
     }
 
     @Override
-    public void addLast(@NotNull T item) {
+    public void addLast(T item) {
         Objects.requireNonNull(item);
         var preLast = sentinel.pre;
         var last = new Node<>(item, preLast, sentinel);

@@ -1,7 +1,5 @@
 package deque;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.Iterator;
 
 public interface Deque<T> extends Iterable<T> {
@@ -10,11 +8,11 @@ public interface Deque<T> extends Iterable<T> {
      *
      * @param item - the item to add
      */
-    public void addFirst(@NotNull T item);
+    public void addFirst(T item);
 
-    public void addLast(@NotNull T item);
+    public void addLast( T item);
 
-    public default boolean isEmpty() {
+    default boolean isEmpty() {
         return size() == 0;
     }
 
