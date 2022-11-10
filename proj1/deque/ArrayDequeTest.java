@@ -25,32 +25,4 @@ public class ArrayDequeTest {
             assertEquals(i, item.intValue());
         });
     }
-
-    @Test
-    public void test_add_and_get() {
-        System.out.printf(" floor mod: %s%n", floorMod(12,10));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    }
 }

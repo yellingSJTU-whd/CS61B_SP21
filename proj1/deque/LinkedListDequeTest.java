@@ -177,8 +177,8 @@ public class LinkedListDequeTest {
         var deque = new LinkedListDeque<Integer>();
         IntStream.range(0, count).forEachOrdered(deque::addLast);
         IntStream.range(0, count).forEachOrdered(i -> {
+            assertEquals(i, deque.get(i).intValue());
             assertEquals(i, deque.getRecursive(i).intValue());
         });
-//        assertEquals(1,deque.get(1).intValue());
     }
 }
