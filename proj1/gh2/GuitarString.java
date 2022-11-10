@@ -2,7 +2,6 @@ package gh2;
 
 import deque.ArrayDeque;
 import deque.Deque;
-import edu.princeton.cs.algs4.StdRandom;
 
 import java.util.stream.IntStream;
 
