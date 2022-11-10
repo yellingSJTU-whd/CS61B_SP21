@@ -1,6 +1,10 @@
 package deque;
 
+import edu.princeton.cs.algs4.StdRandom;
 import org.junit.Test;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
 
@@ -120,9 +124,61 @@ public class LinkedListDequeTest {
     }
 
     @Test
-    public void test_add_and_get() {
+    public void randomized_test() {
         var deque = new LinkedListDeque<Integer>();
-        deque.addFirst(2);
-        assertEquals(2, deque.getRecursive(0).intValue());
+        int count = 5000;
+        AtomicInteger firstItem = new AtomicInteger(-1);
+        AtomicInteger lastItem = new AtomicInteger(-1);
+        AtomicInteger size = new AtomicInteger();
+        IntStream.range(0, count).forEachOrdered(i -> {
+            int random = StdRandom.uniform(0, 5);
+            switch (random) {
+                case 0 -> {
+                    deque.addFirst(i);
+                    size.getAndIncrement();
+                    firstItem.set(i);
+                    System.out.printf("add %s at front%n", i);
+                    deque.printDeque();
+                }
+                case 1 -> {
+                    deque.addLast(i);
+                    size.getAndIncrement();
+                    lastItem.set(i);
+                    System.out.printf("add %s at rear%n", i);
+                    deque.printDeque();
+                }
+                case 2 -> {
+                    System.out.printf("checking isEmpty()%n");
+                    deque.printDeque();
+                    assertEquals(size.get() == 0, deque.isEmpty());
+                }
+                case 3 -> {
+                    System.out.printf("checking size()%n");
+                    deque.printDeque();
+                    assertEquals(size.get(), deque.size());
+                }
+                case 4 -> {
+                    System.out.printf("checking get: expected size = %s, real size = %s%n", size.get(), deque.size());
+                    deque.printDeque();
+                    if (firstItem.get() != -1) {
+                        assertEquals(firstItem.get(), deque.get(0).intValue());
+                    }
+                    if (lastItem.get() != -1) {
+                        assertEquals(lastItem.get(), deque.get(size.get() - 1).intValue());
+                    }
+                }
+            }
+        });
+    }
+
+    @Test
+    public void test_get() {
+        int count = 100;
+        var deque = new LinkedListDeque<Integer>();
+        IntStream.range(0, count).forEachOrdered(deque::addLast);
+        IntStream.range(0, count).forEachOrdered(i -> {
+            assertEquals(i, deque.getRecursive(i).intValue());
+        });
+//        assertEquals(1,deque.get(1).intValue());
     }
 }

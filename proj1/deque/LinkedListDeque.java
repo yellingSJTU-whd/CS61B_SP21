@@ -89,7 +89,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     }
 
     public T getRecursive(int index) {
-        if (index > size - 1) {
+        if (isEmpty() || index > size - 1) {
             return null;
         }
         return getRecursive(sentinel.next, index);
@@ -99,10 +99,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         if (floorMod(index, size) == 0) {
             return node.item;
         }
-        if (index < size / 2) {
-            return getRecursive(node.next, index - 1);
-        }
-        return getRecursive(node.pre, index + 1);
+        return getRecursive(node.next, index - 1);
     }
 
     @Override
@@ -166,7 +163,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
                 return null;
             }
             if (index < size / 2) {
-                IntStream.range(0, index - 1).forEach(i -> cursor = cursor.next);
+                IntStream.range(0, index).forEach(i -> cursor = cursor.next);
                 return next();
             }
             IntStream.range(0, size - index - 1).forEach(i -> cursor = cursor.pre);
