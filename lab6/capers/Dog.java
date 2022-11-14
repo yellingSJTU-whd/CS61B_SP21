@@ -8,12 +8,12 @@ import static capers.CapersRepository.CAPERS_FOLDER;
 import static capers.Utils.*;
 
 /** Represents a dog that can be serialized.
- * @author TODO
+ * @author eYyoc
 */
-public class Dog implements Serializable{ // TODO
+public class Dog implements Serializable {
 
     /** Folder that dogs live in. */
-    static final File DOG_FOLDER = join(CAPERS_FOLDER,"/dogs");
+    static final File DOG_FOLDER = join(CAPERS_FOLDER, "dogs");
 
 
     /** Age of dog. */
@@ -42,13 +42,11 @@ public class Dog implements Serializable{ // TODO
      * @return Dog read from file
      */
     public static Dog fromFile(String name) {
-        var dogFile = join(DOG_FOLDER, "/", name);
+        var dogFile = join(DOG_FOLDER, name);
         if (!dogFile.exists()) {
             throw error("no such dog: %s", name);
         }
-        var dog = readObject(dogFile, Dog.class);
-        System.out.println("loaded: "+ dog.toString());
-        return dog;
+        return readObject(dogFile, Dog.class);
     }
 
     /**
@@ -64,13 +62,13 @@ public class Dog implements Serializable{ // TODO
      * Saves a dog to a file for future use.
      */
     public void saveDog() {
-        if ( !DOG_FOLDER.exists() && !DOG_FOLDER.mkdir()) {
+        if (!DOG_FOLDER.exists() && !DOG_FOLDER.mkdir()) {
             throw error("failed to save %s", name);
         }
 
-        var dogFile = join(DOG_FOLDER, "/", name);
+        var dogFile = join(DOG_FOLDER, name);
         try {
-            if (dogFile.exists()){
+            if (dogFile.exists()) {
                 dogFile.delete();
                 dogFile.createNewFile();
             }
@@ -78,7 +76,6 @@ public class Dog implements Serializable{ // TODO
             throw error(e.getMessage());
         }
         writeObject(dogFile, this);
-        System.out.println(toString());
     }
 
     @Override

@@ -8,14 +8,13 @@ import static capers.Utils.*;
 /**
  * A repository for Capers
  *
- * @author TODO
+ * @author eYyoc
  * The structure of a Capers Repository is as follows:
  * <p>
  * .capers/ -- top level folder for all persistent data in your lab12 folder
  *    - dogs/ -- folder containing all of the persistent data for dogs
  *    - story -- file containing the current story
  *
- * TODO: change the above structure if you do something different.
  */
 public class CapersRepository {
     /**
@@ -26,8 +25,9 @@ public class CapersRepository {
     /**
      * Main metadata folder.
      */
-    static final File CAPERS_FOLDER = join(CWD, "/.capers");
-    static final File STORY_FILE = join(CAPERS_FOLDER, "/story");
+    static final File CAPERS_FOLDER = join(CWD, ".capers");
+    static final File STORY_FILE = join(CAPERS_FOLDER, "story");
+
     /**
      * Does required filesystem operations to allow for persistence.
      * (creates any necessary folders or files)
@@ -39,9 +39,10 @@ public class CapersRepository {
      */
     public static void setupPersistence() {
         try {
-            if (!CAPERS_FOLDER.exists()) {
-                CAPERS_FOLDER.mkdir();
+            if (CAPERS_FOLDER.exists()) {
+                CAPERS_FOLDER.delete();
             }
+            CAPERS_FOLDER.mkdir();
             STORY_FILE.createNewFile();
         } catch (IOException e) {
             throw error("failed to setup persistence: %s", e.getMessage());
@@ -55,7 +56,7 @@ public class CapersRepository {
      */
     public static void writeStory(String text) {
         String savedStory = readContentsAsString(STORY_FILE);
-        String newStory = savedStory.length()==0? text:savedStory + "\n" + text;
+        String newStory = savedStory.length() == 0 ? text : savedStory + "\n" + text;
         writeContents(STORY_FILE, newStory);
         System.out.println(newStory);
     }
