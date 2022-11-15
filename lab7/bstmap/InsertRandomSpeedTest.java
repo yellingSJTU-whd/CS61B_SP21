@@ -25,7 +25,7 @@ public class InsertRandomSpeedTest {
         System.out.print("Please enter desired length of each string: ");
         int L = waitForPositiveInt(input);
 
-        String repeat = "y";
+        String repeat;
         do {
             System.out.print("\nEnter # strings to insert into the maps: ");
             int N = waitForPositiveInt(input);
@@ -44,10 +44,10 @@ public class InsertRandomSpeedTest {
       * Map61B 61bMap. */
     public static double insertRandom(Map61B<String, Integer> map61B, int N, int L) {
         Stopwatch sw = new Stopwatch();
-        String s = "cat";
+        String s;
         for (int i = 0; i < N; i++) {
             s = StringUtils.randomString(L);
-            map61B.put(s, new Integer(i));
+            map61B.put(s, i);
         }
         return sw.elapsedTime();
     }
@@ -56,10 +56,10 @@ public class InsertRandomSpeedTest {
       * TreeMap treeMap. */
     public static double insertRandom(TreeMap<String, Integer> treeMap, int N, int L) {
         Stopwatch sw = new Stopwatch();
-        String s = "cat";
+        String s;
         for (int i = 0; i < N; i++) {
             s = StringUtils.randomString(L);
-            treeMap.put(s, new Integer(i));
+            treeMap.put(s, i);
         }
         return sw.elapsedTime();
     }
@@ -68,10 +68,10 @@ public class InsertRandomSpeedTest {
      * HashMap treeMap. */
     public static double insertRandom(HashMap<String, Integer> treeMap, int N, int L) {
         Stopwatch sw = new Stopwatch();
-        String s = "cat";
+        String s;
         for (int i = 0; i < N; i++) {
             s = StringUtils.randomString(L);
-            treeMap.put(s, new Integer(i));
+            treeMap.put(s, i);
         }
         return sw.elapsedTime();
     }
@@ -130,7 +130,7 @@ public class InsertRandomSpeedTest {
         and outputs that int
     */
     public static int waitForPositiveInt(Scanner input) {
-        int ret = 0;
+        int ret;
         do {
             while (!input.hasNextInt()) {
                 errorBadIntegerInput();
