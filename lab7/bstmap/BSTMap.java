@@ -1,7 +1,6 @@
 package bstmap;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
