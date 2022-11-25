@@ -25,7 +25,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
 
     private final double loadFactor;
 
-    int size;
+    private int size;
 
     /**
      * Protected helper class to store key/value pairs
@@ -38,26 +38,6 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
         Node(K k, V v) {
             key = k;
             value = v;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(key) ^ Objects.hashCode(value);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == this) {
-                return true;
-            }
-
-            if (o instanceof MyHashMap.Node) {
-                @SuppressWarnings("unchecked")
-                Node that = (Node) o;
-                return Objects.equals(key, that.key)
-                        && Objects.equals(value, that.value);
-            }
-            return false;
         }
     }
 
@@ -141,9 +121,6 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
     private Collection<Node>[] createTable(int tableSize) {
         return new Collection[tableSize];
     }
-
-    // TODO: Implement the methods of the Map61B Interface below
-    // Your code won't compile until you do so!
 
     @Override
     public void clear() {
