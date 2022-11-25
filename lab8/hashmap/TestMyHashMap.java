@@ -1,6 +1,7 @@
 package hashmap;
 
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -31,7 +32,7 @@ public class TestMyHashMap {
         for (int i = 0; i < 455; i++) {
             b.put("hi" + i, 1);
             //make sure put is working via containsKey and get
-            assertTrue(null != b.get("hi" + i)
+            assertTrue(String.format("error at i = %s%n", i), null != b.get("hi" + i)
                     && b.containsKey("hi" + i));
         }
         b.clear();
@@ -60,7 +61,7 @@ public class TestMyHashMap {
     }
 
     public static void sanityGetTest(MyHashMap<String, Integer> b) {
-        assertEquals(null, b.get("starChild"));
+        assertNull(b.get("starChild"));
         b.put("starChild", 5);
         assertNotEquals(null, b.get("starChild"));
         b.put("KISS", 5);
@@ -101,7 +102,7 @@ public class TestMyHashMap {
     }
 
     public static void sanityKeySetTest(MyHashMap<String, Integer> b) {
-        HashSet<String> values = new HashSet<String>();
+        HashSet<String> values = new HashSet<>();
         for (int i = 0; i < 455; i++) {
             b.put("hi" + i, 1);
             values.add("hi" + i);
@@ -119,7 +120,7 @@ public class TestMyHashMap {
     }
 
     public static void functionalityTest(MyHashMap<String, String> dictionary,
-                                   MyHashMap<String, Integer> studentIDs) {
+                                         MyHashMap<String, Integer> studentIDs) {
         assertEquals(0, dictionary.size());
 
         // can put objects in dictionary and get them

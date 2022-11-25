@@ -64,7 +64,7 @@ public class TestBSTMapExtra {
      */
     @Test
     public void testRemoveThreeCases() {
-        BSTMap<String, String> q = new BSTMap<String, String>();
+        BSTMap<String, String> q = new BSTMap<>();
         q.put("c", "a");
         q.put("b", "a");
         q.put("a", "a");
