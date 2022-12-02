@@ -1,6 +1,12 @@
 package gitlet;
 
 import java.io.File;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+
 import static gitlet.Utils.*;
 
 // TODO: any imports you need here
@@ -26,4 +32,10 @@ public class Repository {
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
     /* TODO: fill in the rest of this class. */
+
+    public static void main(String[] args) {
+        var time = LocalDateTime.ofInstant(Instant.ofEpochSecond(0L), ZoneId.of("Asia/Shanghai"));
+        var formatter = DateTimeFormatter.ofPattern("dd-MM-yyy HH:mm:ss");
+        System.out.println(time.format(formatter));
+    }
 }
