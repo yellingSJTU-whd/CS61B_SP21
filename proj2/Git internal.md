@@ -1,6 +1,6 @@
 [TOC]
 
-![GIT internal structure ](assets/Git internal.assets/git-internal-struct.jpg)
+![GIT internal structure ](.assets/Git internal.assets/git-internal-struct.jpg)
 
 # Plumbing and Porcelain
 

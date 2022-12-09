@@ -10,7 +10,7 @@ import java.util.Date; // TODO: You'll likely use this in this class
  *
  *  @author TODO
  */
-public class Commit {
+public class Commit implements Dumpable{
     /**
      * TODO: add instance variables here.
      *
@@ -21,6 +21,11 @@ public class Commit {
 
     /** The message of this Commit. */
     private String message;
+
+    @Override
+    public void dump() {
+
+    }
 
     /* TODO: fill in the rest of this class. */
 }

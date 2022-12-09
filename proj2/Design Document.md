@@ -13,10 +13,8 @@ within this commit.
 */
 Class Commit implements Dumpable{
     static final ZoneId shanghai  = ZoneId.of("Asia/Shanghai");
-    static final var formatter = DateTimeFrmatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+    static final var formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
      final String sha1;
-    
-    String branch;
     
     String message;
     ZonedDateTime time;
@@ -86,9 +84,13 @@ Class Blob implements Dumpable{
 
 ```java
 /**
-Represents a gitlet repository, handling persistence jobs such as seralization of gitlet objects.
+Representing a gitlet repository, Repository will set up all persistence at a specified project repository. 
+1. objects system: storing blob and commit object at .gitlet/object
+2. staging area: likes git index file, recording essential information to generate a commit object or reset to a specified commit
+3. working tree
+4. reference: including branches in .gitlet/refs/heads and symbolic ref in .gitlet/<symbol>
 */
-Class Repository{
+Class Repository {
     //current working directory
     public static final File CWD;
     
@@ -102,9 +104,13 @@ Class Repository{
         
      //stores staged blobs, mimicing staging area in real git.
      //file name -> sha1-hash, such as "test.txt" -> some sha1-hash
-     private HashMap<String, String> staging;
+     private HashMap<String, String> index;
     
+    class Node() {
+        
+    }
     
+ 	//corresponding method to gitlet command
     public boolean init() {
         //
     }
@@ -144,7 +150,7 @@ Class Repository{
 
 - content addressable: use sha1 hash as address (concatenate as git: first two character & the rest)
 - create a ".gitlet" at "git init"
-- create blob objects at "git add", while commit at "git commit", by serialization
+- create blob objects at "git add", while commit at "git commit", using Java serialization
 
 - blob objects keep the content of files, while commits keep metadata and some pointers
 
@@ -157,6 +163,54 @@ Class Repository{
 
 
 
-# Staging area
+## Staging area
 
-- index file
+- Repository:
+
+    -  keeps a map, which mimics the index file in real git, localing at ".gitlet/index"
+
+    - save and read the map using Java serialization
+
+    - update the map at  every calling of folowing commands:
+
+        ```bash
+        git add
+        ```
+
+        ```bash
+        git status
+        ```
+
+        ```bash
+        git rm
+        ```
+
+        ```bash
+        git checkout
+        ```
+
+        ```bash
+        git reset
+        ```
+
+    - create a commit object and save it at calling of git commit
+
+    - holds a nested record class Node
+
+- index file, serialized hashMap<String, Node>
+
+    - key: relative path of a file
+
+    - value: a Node recording a file's status in three trees
+
+        ```java
+        record Node {
+        	String relativeFilePath;
+            ZonedDateTime lastModifiedTime;
+            String gitRepoHash;
+            String indexHash;
+            String workingTreeHash;
+        }
+        ```
+
+        
