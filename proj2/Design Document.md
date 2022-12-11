@@ -1,7 +1,5 @@
 # Classes and Data Structures
 
-![Two commits and their blobs](./../../../../Program Files/Typora/assets/commits-and-blobs.png)
-
 
 
 ## Commit

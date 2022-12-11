@@ -57,16 +57,15 @@ The old blob will be token away by git gc, which is not suported in gitlet.
     final HashMap<String, String> blobs;
     ```
 
-    
 2. ```java
-    final String sha1;
+    public final String sha1;
     ```
 
     
 
 3. ```java
     //stores the sha1 hash of parents, rather than parents objects
-    final ArrayList<String> parents;
+    public final List<String> parents;
     ```
 
      
@@ -74,7 +73,7 @@ The old blob will be token away by git gc, which is not suported in gitlet.
 4. ```java
     //Constants
     static final ZoneId shanghai = ZoneId.of("Asia/Shanghai");
-    static final var formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+    static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
     ```
 
      
@@ -82,7 +81,7 @@ The old blob will be token away by git gc, which is not suported in gitlet.
 5. ```java
     //metadata
     final String message;
-    final ZonedDateTime time;
+    final ZonedDateTime date;
     ```
 
     
@@ -90,9 +89,10 @@ The old blob will be token away by git gc, which is not suported in gitlet.
 ### Repository
 
 - Handles all the persistence, including storing objects
-- Keeps a map which stores information like git index file, where contains status about tracd files in three trees.
+- Keeps a map which stores information like git index file, which act likes a virtual working tree
+- The factory to generate commit objects
 
-
+![git checkout](.assets/gitlet-design.assets/git checkout.png)
 
 ### GitletService
 
@@ -101,8 +101,15 @@ The old blob will be token away by git gc, which is not suported in gitlet.
 
 
 
-
 ## Algorithms
+
+- content addressable: gitlet object sha1 -->  location
+- three tree structure:
+    - working tree: CWD
+    - staging tree: .gitlet/index
+    - git commit tree: git local repository
+
+![git three tree model](.assets/gitlet-design.assets/git three tree model.png)
 
 ## Persistence
 
