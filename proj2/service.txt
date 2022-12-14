@@ -1,0 +1,43 @@
+git init:
+	1. create git repository
+	2. create a commit object with unix epoch time
+	
+git add:
+	1. create a blob
+	2. store the blob at .gitlet/object folder, allocating it by sha1 
+	3. stage the blob
+
+git commit:
+	1. create a commit object, according to the staging area
+	2. move HEAD pointer
+	
+git rm:
+	// for a staged but not yet commited file, unstaged it.
+	// for a file been commited, remove it from staging area and working tree. Its removal is waited to be commit
+	1. check the status of a file in staging area
+	2. unstaged a file --> remove the corresponding entry from map
+	   tacked: stage for removal, delete from working tree --> sha1 for working tree / staging area: zeros
+	   
+git log:
+	1. fetch HEAD --> branch --> last commit on the branch
+	2. print current commit, and fetch first parent if there is one (recursion?)
+	
+git global-log:
+	1. iterate through the .gitlet/objects/commits folder, fetch and print all commit
+	
+git find:
+	// git global-log with filter
+	1. iterate and print if the message matches
+	
+git status:
+	//                 		commit tree		stage tree		working tree
+	// staged files  		 	❌			    ✔				 ✔	
+	// removed files			✔				❌				 ❌
+	// modifications not	
+	// staged for commit		❌				❌				 ✔
+	// untracked files			❌				❌				 ✔	
+	// modifications not staged for commit --> a files traced, but the new modification has not been added to git
+	// untracked files --> not tracking by index file, but stay at working tree
+	
+
+	

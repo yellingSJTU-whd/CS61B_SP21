@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static gitlet.Repository.CWD;
+import static gitlet.Utils.join;
 
 /**
  * Represents a gitlet commit object.
@@ -63,10 +64,21 @@ public class Commit implements Dumpable {
         builder.append("This is a Commit").append("%n");
         builder.append("Date: ").append(Utils.date2String(date));
         builder.append("Commit message: ").append(message);
-        builder.append("Parent(s):").append("%n");
-        parents.forEach(parent -> builder.append(tab).append(parent).append("%n"));
-        builder.append("Including blobs:").append("%n");
-        blobs.forEach(blob -> builder.append(tab).append(Utils.join(CWD, blob.path).getName()).append(tab).append(blob.sha1));
+
+        builder.append(parents.size()).append(" parent(s):").append("%n");
+        parents.forEach(parent ->
+                builder.append(tab).append(parent).append("%n"));
+
+        builder.append("Including ")
+                .append(blobs.size())
+                .append(" blobs")
+                .append("%n");
+        blobs.forEach(blob ->
+                builder.append(tab)
+                        .append(join(CWD, blob.path).getName())
+                        .append(tab)
+                        .append(blob.sha1));
+
         System.out.println(builder);
     }
 

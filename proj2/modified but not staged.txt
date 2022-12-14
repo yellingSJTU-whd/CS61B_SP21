@@ -1,0 +1,5 @@
+modified but not staged:
+1. file tracked, working tree sha1 ≠ commit tree sha1 --> there is some modification since last commit
+2. file tracked, not in commit tree but in stage tree, while working tree sha1 (≠null) ≠ stage tree sha1
+3. file tracked, not in commit tree but in stage tree, while working tree sha1 = null (file removed) ≠ stage tree sha1
+4. file tracked, in commit tree (commit tree sha1 == staging tree sha1), while working tree sha1 = null

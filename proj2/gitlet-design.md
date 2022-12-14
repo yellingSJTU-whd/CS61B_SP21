@@ -1,14 +1,12 @@
 # Gitlet Design Document
 
-------
-
 **Name**: eYyoz
 
 
 
-## Classes and Data Structures
 
-------
+
+## Classes and Data Structures
 
 ### Blob
 
@@ -110,6 +108,8 @@ The old blob will be token away by git gc, which is not suported in gitlet.
     - git commit tree: git local repository
 
 ![git three tree model](.assets/gitlet-design.assets/git three tree model.png)
+
+
 
 ## Persistence
 

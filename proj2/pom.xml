@@ -15,6 +15,14 @@
     <artifactId>proj2</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>6.4.0.202211300538-r</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <sourceDirectory>${project.basedir}</sourceDirectory>
         <testSourceDirectory>${project.basedir}</testSourceDirectory>

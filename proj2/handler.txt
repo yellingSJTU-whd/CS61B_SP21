@@ -1,0 +1,18 @@
+Repositoty:
+	methods:
+		1.make gitlet repository()
+			// if ".gitlet" exits under CWD, do nothing. Otherwise create gitlet repository
+		2.make new commit(blobs, commit, date, message, parents)
+		
+		3.make new blob(file path)
+		
+		4.store a blob(Blob blob)
+			
+		5.stage a blob(Blob blob)
+		
+		6.make a commit object according to staging area(String message)
+			//get parent from HEAD and .gitlet/objects/heads
+			//move HEAD pointer
+		7.move HEAD pointer
+			//supporting checkout and commit
+			

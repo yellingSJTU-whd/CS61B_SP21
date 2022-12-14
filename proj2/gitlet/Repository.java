@@ -2,16 +2,12 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDateTime;
+import java.nio.file.Files;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.util.HashMap;
-import java.util.Locale;
 
 import static gitlet.Utils.*;
+import static java.lang.Thread.sleep;
 
 // TODO: any imports you need here
 
@@ -33,38 +29,73 @@ public class Repository {
      */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
-    private static final HashMap<String, Node> index;
-
-    static {
-        var indexFile = join(GITLET_DIR, "index");
-        if (indexFile.exists() && indexFile.isFile()) {
-            index = readObject(indexFile, HashMap.class);
-        } else {
-            try {
-                indexFile.createNewFile();
-            } catch (IOException e) {
-                throw error("fatal error: gitlet directory corrupted");
-            }
-            index = new HashMap<>();
-        }
-    }
+//    private static final HashMap<String, Node> index;
+//
+//    /**
+//     *  Load index file if exists.
+//     */
+//    static {
+//        var indexFile = join(GITLET_DIR, "index");
+//        if (indexFile.exists() && indexFile.isFile()) {
+//            index = readObject(indexFile, HashMap.class);
+//        }
+//    }
 
     /* TODO: fill in the rest of this class. */
     static final ZoneId shanghai = ZoneId.of("Asia/Shanghai");
 
-    private static class Node {
-        ZonedDateTime lastModifiedTime;
-        String path;
-        String wdir;
-        String stage;
-        String repo;
+    /**
+     * An entry represents a file, tracking its status by keeping sha1 under three trees.
+     */
+    private static class Entry {
 
-        Node(ZonedDateTime date, String path, String wdir, String stage, String repo) {
+        /**
+         * Last time when the content of a file is modified, rather than metadata.
+         */
+        ZonedDateTime lastModifiedTime;
+
+        /**
+         * Relative path under Current Working Directory.
+         */
+        String path;
+
+        /**
+         * Sha1 of the file content under Current Working Directory.
+         */
+        String workingTree;
+
+        /**
+         * Sha1 of
+         */
+        String stagingTree;
+        String commitTree;
+
+        Entry(ZonedDateTime date, String path, String workingTree, String stagingTree, String commitTree) {
 
         }
     }
 
-    public static void main(String[] args) {
+    /**
+     * Build gitlet repository if it doesn't exit.          <br>
+     * The gitlet repository has the following structure:   <br>
+     * CWD                                                  <br>
+     * ├─── working tree                                    <br>
+     * │    └── subtree                                     <br>
+     * │                                                    <br>
+     * └── .gitlet                                          <br>
+     *     ├── objects                                      <br>
+     *     │   └── blobs                                    <br>
+     *     │   └── commits                                  <br>
+     *     ├── refs                                         <br>
+     *     │   └── heads                                    <br>
+     *     ├── HEAD                                         <br>
+     *     └── index                                        <br>
+     */
+    private static void buildGitletRepository() {
+
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
 //        var time = LocalDateTime.ofInstant(Instant.ofEpochSecond(0L), ZoneId.of("Asia/Shanghai"));
 //        var formatter = DateTimeFormatter.ofPattern("dd-MM-yyy HH:mm:ss");
 //        System.out.println(time.format(formatter));
@@ -89,5 +120,9 @@ public class Repository {
 //        } catch (IOException e) {
 //            throw new RuntimeException(e);
 //        }
+
+//        System.out.println(CWD);
+//        System.out.println(plainFilenamesIn(join(CWD, "a")));
+
     }
 }
