@@ -25,7 +25,7 @@ public class Commit implements Dumpable {
     /**
      * Blobs included in this commit.
      */
-    private final List<Blob> blobs;
+    private final List<String> blobs;
 
     /**
      * Sha1 hash for this commit, used as UID.
@@ -47,7 +47,7 @@ public class Commit implements Dumpable {
      */
     private final ZonedDateTime date;
 
-    Commit(List<Blob> blobs, List<String> parents, String message, ZonedDateTime date) {
+    Commit(List<String> blobs, List<String> parents, String message, ZonedDateTime date) {
         this.blobs = blobs;
         this.parents = parents;
         this.message = message;
@@ -73,11 +73,11 @@ public class Commit implements Dumpable {
                 .append(blobs.size())
                 .append(" blobs")
                 .append("%n");
-        blobs.forEach(blob ->
-                builder.append(tab)
-                        .append(join(CWD, blob.path).getName())
-                        .append(tab)
-                        .append(blob.sha1));
+//        blobs.forEach(blob ->
+//                builder.append(tab)
+//                        .append(join(CWD, blob.path).getName())
+//                        .append(tab)
+//                        .append(blob.sha1));
 
         System.out.println(builder);
     }

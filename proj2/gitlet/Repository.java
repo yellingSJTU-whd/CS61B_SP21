@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.PriorityQueue;
 
 import static gitlet.Utils.*;
 import static java.lang.Thread.sleep;
@@ -42,7 +45,7 @@ public class Repository {
 //    }
 
     /* TODO: fill in the rest of this class. */
-    static final ZoneId shanghai = ZoneId.of("Asia/Shanghai");
+    public static final ZoneId shanghai = ZoneId.of("Asia/Shanghai");
 
     /**
      * An entry represents a file, tracking its status by keeping sha1 under three trees.
@@ -83,46 +86,23 @@ public class Repository {
      * │    └── subtree                                     <br>
      * │                                                    <br>
      * └── .gitlet                                          <br>
-     *     ├── objects                                      <br>
-     *     │   └── blobs                                    <br>
-     *     │   └── commits                                  <br>
-     *     ├── refs                                         <br>
-     *     │   └── heads                                    <br>
-     *     ├── HEAD                                         <br>
-     *     └── index                                        <br>
+     * ├── objects                                      <br>
+     * │   └── blobs                                    <br>
+     * │   └── commits                                  <br>
+     * ├── refs                                         <br>
+     * │   └── heads                                    <br>
+     * ├── HEAD                                         <br>
+     * └── index                                        <br>
      */
     private static void buildGitletRepository() {
 
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-//        var time = LocalDateTime.ofInstant(Instant.ofEpochSecond(0L), ZoneId.of("Asia/Shanghai"));
-//        var formatter = DateTimeFormatter.ofPattern("dd-MM-yyy HH:mm:ss");
-//        System.out.println(time.format(formatter));
 
-//        var date = ZonedDateTime.now(shanghai);
-//        var formatter = DateTimeFormatter.ofPattern("EEE LLL d kk:mm:ss yyyy Z").localizedBy(Locale.ENGLISH);
-//        System.out.println(date.format(formatter));
-
-//        var file = join(GITLET_DIR, "index");
-//        System.out.println(file.getPath());
-//        System.out.println(file.getAbsolutePath());
-
-//        var file = join(CWD, "index");
-//        try {
-//            file.createNewFile();
-//            writeContents(file, "abc");
-//            System.out.println(readContentsAsString(file));
-//            System.out.println("====");
-//            writeContents(file);
-//            System.out.println(readContentsAsString(file));
-//            System.out.println("====");
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-
-//        System.out.println(CWD);
-//        System.out.println(plainFilenamesIn(join(CWD, "a")));
-
+        String template = "=== Branches ===" + "%n" +
+                "%s" + "%n";
+        String branches = String.format("*%s%n%s", "master", "other-branch");
+        System.out.printf(template, branches);
     }
 }

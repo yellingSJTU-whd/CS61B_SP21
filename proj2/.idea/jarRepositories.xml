@@ -2,21 +2,6 @@
 <project version="4">
   <component name="RemoteRepositoriesConfiguration">
     <remote-repository>
-      <option name="id" value="central" />
-      <option name="name" value="Central Repository" />
-      <option name="url" value="https://artsh.zte.com.cn/artifactory/public-maven-virtual" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="apache-snapshot-maven" />
-      <option name="name" value="public maven central" />
-      <option name="url" value="https://artsh.zte.com.cn/artifactory/public-maven-virtual" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="ume-maven" />
-      <option name="name" value="include ume and otcp" />
-      <option name="url" value="https://artsh.zte.com.cn/artifactory/ume-maven-virtual" />
-    </remote-repository>
-    <remote-repository>
       <option name="id" value="maven-central" />
       <option name="name" value="public maven central" />
       <option name="url" value="https://artnj.zte.com.cn/artifactory/dev-release-maven-nj/" />
@@ -37,11 +22,6 @@
       <option name="url" value="https://repo1.maven.org/maven2" />
     </remote-repository>
     <remote-repository>
-      <option name="id" value="maven-central" />
-      <option name="name" value="public maven central" />
-      <option name="url" value="https://artsh.zte.com.cn/artifactory/public-maven-virtual" />
-    </remote-repository>
-    <remote-repository>
       <option name="id" value="jboss.community" />
       <option name="name" value="JBoss Community repository" />
       <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
@@ -50,6 +30,11 @@
       <option name="id" value="ume-maven" />
       <option name="name" value="include ume and otcp" />
       <option name="url" value="https://artsh.zte.com.cn/artifactory/ume-maven-virtual/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="central" />
+      <option name="name" value="Central Repository" />
+      <option name="url" value="https://maven.aliyun.com/repository/central" />
     </remote-repository>
   </component>
 </project>
