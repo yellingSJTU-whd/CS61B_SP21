@@ -1,6 +1,10 @@
+[TOC]
+
+
+
 # GitletService
 
-## init()
+## init
 
 - Check whether **".gitlet"** folder exists. If not, do the following:
     - create git repository
@@ -18,7 +22,7 @@ if (!Repository.GITLET_DIR.exists()) {
 
 
 
-## add()
+## add
 
 - create a blob
 - store the blob at **".gitlet/objects/blobs"** folder, allocating it by **SHA1**
@@ -32,7 +36,7 @@ gitletRepo.updateIndex(blob);
 
 
 
-## commit()
+## commit
 
 - create a commit, according to **staging area**
 - move **HEAD** and **${activated_branch}** pointer
@@ -45,7 +49,7 @@ gitletRepo.updateRef(String sha1: commit.sha1);
 
 
 
-## rm()
+## rm
 
 - lookup **index** for status of the file
 
@@ -69,7 +73,7 @@ gitletRepo.updateRef(String sha1: commit.sha1);
 
 
 
-## log()
+## log
 
 - fetch **${activated_branch}** from **HEAD**, and fetch the commit at the tip of **${activated_branch}**
 - print commits
@@ -86,7 +90,7 @@ while(commit != null) {
 
 
 
-## global-log()
+## global-log
 
 - fetch all commit objects under **.gitlet/objects/commits"** 
 - print all commits
@@ -103,7 +107,7 @@ for(String sha1 : commits) {
 
 
 
-## find()
+## find
 
 - fetch all commit objects
 - filter commits with commit message
@@ -123,7 +127,7 @@ for(String sha1: commits) {
 
 
 
-## status()
+## status
 
 - store a template as a constant in Repository class
 - interpolate branches and HEAD into **Branches**
@@ -153,7 +157,7 @@ static {
 
 
 
-## checkout()
+## checkout
 
 - ```bash
     java gitlet.Main checkout -- [file name]
@@ -185,6 +189,6 @@ static {
     java gitlet.Main checkout [branch name]
     ```
 
-    - fetch the lastest commit at the branch
-        - change **index** according to hte commit
-        - overwrite local files
+    - fetch the lastest commit at the specified branch
+        - change **index** according to the commit
+        - overwrite local files(delete if not tracked in the checkouted branch)
