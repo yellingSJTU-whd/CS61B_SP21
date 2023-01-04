@@ -12,10 +12,10 @@ git commit:
 	2. move HEAD pointer
 	
 git rm:
-	// for a staged but not yet commited file, unstaged it.
-	// for a file been commited, remove it from staging area and working tree. Its removal is waited to be commit
+	// for a staged but not yet committed file, unstage it.
+	// for a file been committed, remove it from staging area and working tree. Its removal is waited to be commit
 	1. check the status of a file in staging area
-	2. unstaged a file --> remove the corresponding entry from map
+	2. unstage a file --> remove the corresponding entry from map
 	   tacked: stage for removal, delete from working tree --> sha1 for working tree / staging area: zeros
 	   
 git log:

@@ -1,15 +1,17 @@
 git repository(handler):
+Repository.class: handles all operation upon .gitlet folder and working tree as well,
+including: gitlet objects manipulations、
 
 === checking:
 	1. init:	check whether .gitlet folder exist --> checkGitletRepository()
 	2. add: 	check whether file exist --> Java API
-	3. commit:	check whether there is any file to be commit, and there is a commit message --> checkForFilesToCommit() && args length
+	3. commit:	check whether there is any file to be committed, and there is a commit message --> checkForFilesToCommit() && args length
 	4. rm:		check whether file exist --> Java API
 	5. checkout: checkFileInCommit(file, commit)  &&  checkBranch(branch: String)
 	6. rm-branch: checkBranch()  &&  retrieveHEAD()
 	7. reset:	checkCommit(commit id: String)  && checkSafeToReset
 	
-=== object database utiles:
+=== object database utils:
 	1. make and store a blob object
 	2. make and store a commit object
 	3. update index
@@ -20,7 +22,7 @@ git repository(handler):
 	8. find a commit by [commit message]
 	9. search a file at index, checking its status under 3 trees(git commit tree, index, working tree) ==> enum(file status)
 	
-=== references utiles:
+=== references utils:
 	1. retrieve [current branch]
 	2. move a branch forward to another commit
 	
