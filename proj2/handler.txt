@@ -1,18 +1,40 @@
-Repositoty:
-	methods:
-		1.make gitlet repository()
-			// if ".gitlet" exits under CWD, do nothing. Otherwise create gitlet repository
-		2.make new commit(blobs, commit, date, message, parents)
-		
-		3.make new blob(file path)
-		
-		4.store a blob(Blob blob)
-			
-		5.stage a blob(Blob blob)
-		
-		6.make a commit object according to staging area(String message)
-			//get parent from HEAD and .gitlet/objects/heads
-			//move HEAD pointer
-		7.move HEAD pointer
-			//supporting checkout and commit
-			
+git repository(handler):
+
+=== checking:
+	1. init:	check whether .gitlet folder exist --> checkGitletRepository()
+	2. add: 	check whether file exist --> Java API
+	3. commit:	check whether there is any file to be commit, and there is a commit message --> checkForFilesToCommit() && args length
+	4. rm:		check whether file exist --> Java API
+	5. checkout: checkFileInCommit(file, commit)  &&  checkBranch(branch: String)
+	6. rm-branch: checkBranch()  &&  retrieveHEAD()
+	7. reset:	checkCommit(commit id: String)  && checkSafeToReset
+	
+=== object database utiles:
+	1. make and store a blob object
+	2. make and store a commit object
+	3. update index
+	4. change working tree directory
+	5. create/delete branch
+	6. build gitlet repository
+	7. find a blob/commit by SHA-1 HASH
+	8. find a commit by [commit message]
+	9. search a file at index, checking its status under 3 trees(git commit tree, index, working tree) ==> enum(file status)
+	
+=== references utiles:
+	1. retrieve [current branch]
+	2. move a branch forward to another commit
+	
+=== read and operate:
+	1. git status
+	2. find a blob/commit by SHA1
+	3. find a commit by [commit message]
+	4. find a branch by name
+
+=== file status:
+	1. untracked -> 0, unpresented at index file
+	2. stage for addition, but never tracked by commit tree
+	
+	
+
+	
+	

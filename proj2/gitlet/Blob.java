@@ -8,6 +8,7 @@ import static gitlet.Utils.join;
 import static gitlet.Utils.sha1;
 
 /**
+ * @author eYyoz
  * Immutable class to represent a file, judging equality by file content.
  */
 public class Blob implements Dumpable {
@@ -15,7 +16,7 @@ public class Blob implements Dumpable {
     /**
      * Relative path under current working directory.
      */
-    final String path;
+    private final String path;
 
     /**
      * Content of the underlying file.
@@ -23,21 +24,46 @@ public class Blob implements Dumpable {
     private final String content;
 
     /**
-     * Sha1 hash of this blob, derived from content.
+     * SHA-1 HASH of this blob, derived from content.
      */
-    public final String sha1;
+    private final String sha1;
 
+    /**
+     * @param relativePath relative file path under CWD
+     * Constructor for blob. The existence of the file is unchecked.
+     */
     Blob(String relativePath) {
         path = relativePath;
         content = readContentsAsString(join(CWD, relativePath));
         sha1 = sha1(content);
     }
 
+    /**
+     * @return content of the underlying file
+     */
+    public String getContent() {
+        return content;
+    }
+
+    /**
+     * @return SHA1 hash of the blob
+     */
+    public String getSha1() {
+        return sha1;
+    }
+
+    /**
+     * @return relative path of the file as String
+     */
+    public String getPath() {
+        return path;
+    }
+
     @Override
     public void dump() {
-        String info = "This is a Blob" + "%n" +
-                "Relative path : " + path + "%n" +
-                content + "%n";
+        String info = "This is a Blob" + "%n"
+                + "Relative path : " + path + "%n"
+                + content + "%n";
         System.out.println(info);
     }
 

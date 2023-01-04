@@ -6,7 +6,12 @@
 
 ## init
 
-- Check whether **".gitlet"** folder exists. If not, do the following:
+```bash
+java gitlet.Main init
+```
+
+- **Check** whether  **".gitlet"** folder exists. 
+- If not, do the following:
     - create git repository
     - create a special commit object
 
@@ -24,7 +29,12 @@ if (!Repository.GITLET_DIR.exists()) {
 
 ## add
 
-- create a blob
+```bash
+java gitlet.Main add [file name]
+```
+
+- **Check** whether **[file name]** exists
+- create a blob with **[file name]**
 - store the blob at **".gitlet/objects/blobs"** folder, allocating it by **SHA1**
 - update the **staging area**
 
@@ -38,6 +48,11 @@ gitletRepo.updateIndex(blob);
 
 ## commit
 
+```bash
+java gitlet.Main commit [message]
+```
+
+- **Check** if there is any file to commit, or if there is a commit message.
 - create a commit, according to **staging area**
 - move **HEAD** and **${activated_branch}** pointer
 
@@ -51,22 +66,27 @@ gitletRepo.updateRef(String sha1: commit.sha1);
 
 ## rm
 
+```bash
+java gitlet.Main rm [file name]
+```
+
 - lookup **index** for status of the file
 
 - switch case: file status
 
     - tracked, commit tree ≠ staging area = working tree 
         ==> staged for addition 
-        ==> change staging area to commit tree, AKA remove from staging area
+        ==> change staging area to commit tree, unstaging the changes since last commit
 
     - tracked, commit tree = staging area ≠ working tree 
-        ==> tracked in current commit
-        ==> change staging area and commit tree to working tree,
-         AKA remove from staging area and commit tree
-
+        ==> tracked by tip of an branch, and hasn't stage for addition since last commit
+        ==> marked for removal at **index**, and delete from working tree
+        
+    - file tracked, and there are modifications since last commit, which hasn't add or commit
+        
     - untracked, not in **index**
         ==> error
-
+    
         ```java
         Utils.error("No reason to remove the file.");
         ```
@@ -128,6 +148,10 @@ for(String sha1: commits) {
 
 
 ## status
+
+```bash
+java gitlet.Main status
+```
 
 - store a template as a constant in Repository class
 - interpolate branches and HEAD into **Branches**
@@ -192,3 +216,49 @@ static {
     - fetch the lastest commit at the specified branch
         - change **index** according to the commit
         - overwrite local files(delete if not tracked in the checkouted branch)
+
+
+
+## branch
+
+```bash
+java gitlet.Main branch [branch name]
+```
+
+- create a new file with the [branch name] under **".gitlet/refs"** folder, and stores the commit sha1 at the branch file
+
+
+
+## rm-branch
+
+```bash
+java gitlet.Main rm-branch [branch name]
+```
+
+- check whether [branch name] exists under **".gitlet/refs"**, or whether [branch name] is current branch
+- remove [branch name] under **".gitlet/refs"** folder
+
+
+
+## reset
+
+```bash
+java gitlet.Main reset [commit id]
+```
+
+- **check** whether [commit id] exists under **".gitlet/objects/commits"**, or whether untracked files subjugated to **reset** command
+- change **".gitlet/index"** for files whose version inconsistent between **${activated branch}** and **[commit id]**, change working tree to **[commit id]**
+
+
+
+## merge
+
+```bash
+java gitlet.Main merge [branch name]
+```
+
+
+
+# Repository
+
+handler of the project

@@ -1,0 +1,8 @@
+timing to change index file:
+1. git init 	--> new hashMap
+2. git add 		--> modify staging area
+3. git commit   --> modify commit tree
+4. git checkout --> change all to commit tree
+5. git rm		--> staged: modify staging area; tracked by commit: stage for removal
+6. git reset	--> change all to commit tree
+7. git merge	--> 	

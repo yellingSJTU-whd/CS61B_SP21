@@ -81,28 +81,81 @@ public class Repository {
     /**
      * Build gitlet repository if it doesn't exit.          <br>
      * The gitlet repository has the following structure:   <br>
+     *                                                      <br>
      * CWD                                                  <br>
      * ├─── working tree                                    <br>
-     * │    └── subtree                                     <br>
+     * │    └── subtrees                                    <br>
      * │                                                    <br>
-     * └── .gitlet                                          <br>
-     * ├── objects                                      <br>
-     * │   └── blobs                                    <br>
-     * │   └── commits                                  <br>
-     * ├── refs                                         <br>
-     * │   └── heads                                    <br>
-     * ├── HEAD                                         <br>
-     * └── index                                        <br>
+     * └─── .gitlet                                         <br>
+     *      ├── objects                                     <br>
+     *      │   ├── blobs                                   <br>
+     *      │   └── commits                                 <br>
+     *      ├── refs                                        <br>
+     *      │   └── heads                                   <br>
+     *      ├── HEAD                                        <br>
+     *      └── index                                       <br>
      */
     private static void buildGitletRepository() {
 
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    /** Checking utils */
 
-        String template = "=== Branches ===" + "%n" +
-                "%s" + "%n";
-        String branches = String.format("*%s%n%s", "master", "other-branch");
-        System.out.printf(template, branches);
+    /**
+     * @return whether .gitlet folder exists.
+     */
+    boolean checkGitletRepository() {
+        return false;
+    }
+
+    /**
+     * @return whether there is any file to commit.
+     */
+    boolean checkForFilesToCommit() {
+        return false;
+    }
+
+    /**
+     * @return whether the specified file is contained in the specified commit.
+     */
+    boolean checkForFileInCommit() {
+        return false;
+    }
+
+    /**
+     * @return whether the specified branch exists.
+     */
+    boolean checkBranch() {
+        return false;
+    }
+
+    /**
+     * @return whether the given commit id matches a commit object.
+     */
+    boolean checkCommit() {
+        return false;
+    }
+
+    /**
+     * @return whether there is no any untracked file vulnerable to RESET command.
+     */
+    boolean checkIfSafeToReset() {
+        return false;
+    }
+
+
+
+
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+//git status
+//        String template = "=== Branches ===" + "%n" +
+//                "%s" + "%n";
+//        String branches = String.format("*%s%n%s", "master", "other-branch");
+//        System.out.printf(template, branches);
+
+        System.out.println(CWD);
+        File file = join(CWD, "test", "deep");
+        System.out.println(CWD.toPath().relativize(file.toPath()));
     }
 }

@@ -19,21 +19,23 @@ import static gitlet.Utils.join;
  *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
  *
- * @author TODO
+ * @author eYyoz
  */
 public class Commit implements Dumpable {
     /**
      * Blobs included in this commit.
+     * Key:   relative path under CWD
+     * Value: SHA-1 HASH of the blob
      */
-    private final List<String> blobs;
+    private final HashMap<String, String> blobs;
 
     /**
      * Sha1 hash for this commit, used as UID.
      */
-    public final String sha1;
+    private final String sha1;
 
     /**
-     * Parent commit(s), might be 0, 1 or 2.
+     * Parent commit(s), there might be 0, 1 or 2.
      */
     private final List<String> parents;
 
@@ -47,7 +49,7 @@ public class Commit implements Dumpable {
      */
     private final ZonedDateTime date;
 
-    Commit(List<String> blobs, List<String> parents, String message, ZonedDateTime date) {
+    Commit(HashMap<String, String> blobs, List<String> parents, String message, ZonedDateTime date) {
         this.blobs = blobs;
         this.parents = parents;
         this.message = message;
