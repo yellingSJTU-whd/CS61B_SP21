@@ -264,7 +264,11 @@ class Utils {
 
 
     /* DATE UTILITIES */
-    static String date2String(ZonedDateTime date) {
+    static String format(ZonedDateTime date) {
         return date.format(formatter);
+    }
+
+    static ZonedDateTime parse(String dateString) {
+        return ZonedDateTime.parse(dateString, formatter);
     }
 }
