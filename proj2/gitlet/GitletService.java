@@ -57,8 +57,14 @@ public class GitletService {
         }
     }
 
-    public boolean rm() {
-        return false;
+    public void rm(String fileName) {
+        try {
+            repository.removeFromIndex(fileName);
+            repository.saveIndex();
+        } catch (GitletException e) {
+            Utils.message(e.getMessage());
+            System.exit(0);
+        }
     }
 
     public void log() {

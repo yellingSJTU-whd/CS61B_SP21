@@ -69,7 +69,7 @@ public class Repository {
      * Key:    relative file path as String                                          <br>
      * Value:  file status represented as an entry instance                          <br>
      */
-    private HashMap<String, Entry> index;
+    private final HashMap<String, Entry> index;
 
     private static Repository repository;
 
@@ -83,7 +83,7 @@ public class Repository {
     }
 
     /**
-     * @return an instance of Repository
+     * @return the singleton of Repository
      */
     public static Repository getInstance() {
         if (repository == null) {
@@ -246,24 +246,43 @@ public class Repository {
         return commit.isPresent();
     }
 
-    boolean removeFromIndex(String fileName) {
+    /**
+     * Remove a file from Gitlet if staged or tracked. If staged,
+     * unstage it. If tracked, marked for removal and delete from
+     * working tree if not already done. Throw exception otherwise.
+     */
+    void removeFromIndex(String fileName) {
         //check for initialized gitlet repository
         checkInitialization();
 
         //check whether the file is staged or tracked by tip of a branch
-        if(!index.containsKey(fileName)) {
+        if (!index.containsKey(fileName)) {
             throw error("No reason to remove the file.");
         }
 
         var entry = index.get(fileName);
         var stage = entry.stage;
         var repo = entry.repo;
+        var file = join(CWD, entry.path);
+
         if (!Objects.equals(stage, repo)) {
             index.remove(fileName);
         } else {
+            //stage for removal, the file will remove from index at next commit
             entry.stage = removal;
+            file.delete();
         }
-        return false;
+    }
+
+    /**
+     * Build a String as log from commit tree.
+     */
+    String buildLog() {
+        var builder = new StringBuilder();
+        var deliminator = "===";
+        var separator = System.getProperty("file.separator");
+        var template = deliminator + separator + "commit " + "%s" + separator + "Date: " + "%s" +separator + "%s" + separator;
+        return null;
     }
 
     /** Checking utils */

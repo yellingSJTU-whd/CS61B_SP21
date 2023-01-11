@@ -12,27 +12,35 @@ public class Main {
      * <COMMAND> <OPERAND1> <OPERAND2> ...
      */
     public static void main(String[] args) {
-        if (args.length == 0) {
+        var len = args.length;
+        if (len == 0) {
             Utils.message("Please enter a command.");
             System.exit(0);
         }
 
         var service = GitletService.getInstance();
-        String firstArg = args[0];
+        var firstArg = args[0];
+
         switch (firstArg) {
             case "init" -> service.init();
             case "add" -> {
-                if (args.length != 2) {
+                if (len != 2) {
                     service.exit("Incorrect operands.");
                 }
                 service.add(args[1]);
             }
             case "commit" -> {
-                if (args.length!=2 || args[1].isBlank()){
+                if (len != 2 || args[1].isBlank()) {
                     Utils.message("Please enter a commit message.");
                 } else {
                     service.commit(args[1]);
                 }
+            }
+            case "rm" -> {
+                if (len != 2) {
+                    service.exit("Incorrect operands.");
+                }
+                service.rm(args[1]);
             }
             // TODO: FILL THE REST IN
             default -> {
