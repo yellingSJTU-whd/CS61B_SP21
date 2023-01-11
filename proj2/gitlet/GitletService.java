@@ -1,5 +1,7 @@
 package gitlet;
 
+import static gitlet.Repository.GITLET_DIR;
+
 /**
  * An abstraction over gitlet's functionality.
  *
@@ -24,16 +26,35 @@ public class GitletService {
         return service;
     }
 
-    public boolean init() {
-        return false;
+    public void init() {
+        try {
+            repository.buildGitletRepository();
+        } catch (GitletException e) {
+            repository.sanitize(GITLET_DIR);
+            System.exit(0);
+        }
     }
 
-    public boolean add() {
-        return false;
+    public void add(String path) {
+        try {
+            if (repository.makeBlob(path)) {
+                repository.saveIndex();
+            }
+        } catch (GitletException e){
+            Utils.message(e.getMessage());
+            System.exit(0);
+        }
     }
 
-    public boolean commit() {
-        return false;
+    public void commit(String message) {
+        try {
+            if (repository.makeCommit(message)) {
+                repository.saveIndex();
+            }
+        } catch (GitletException e) {
+            Utils.message(e.getMessage());
+            System.exit(0);
+        }
     }
 
     public boolean rm() {
@@ -74,5 +95,10 @@ public class GitletService {
 
     public boolean merge() {
         return false;
+    }
+
+    public void exit(String msg) {
+        Utils.message(msg);
+        repository.exit();
     }
 }

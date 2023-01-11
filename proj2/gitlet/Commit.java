@@ -79,7 +79,7 @@ public class Commit implements Dumpable {
         builder.append("Commit message: ").append(message).append("\n");
 
         builder.append(parents == null ? 0 : parents.size())
-                .append(" parent(s):")
+                .append(" parent(s)")
                 .append("\n");
         Optional.ofNullable(parents)
                 .ifPresent(commits -> commits.forEach
@@ -92,6 +92,8 @@ public class Commit implements Dumpable {
         Optional.ofNullable(blobs)
                 .ifPresent(files -> files.keySet().forEach
                         (file -> builder.append(tab).append(file).append("\n")));
+
+        System.out.println(builder);
     }
 
     /* TODO: fill in the rest of this class. */

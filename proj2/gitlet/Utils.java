@@ -264,10 +264,17 @@ class Utils {
 
 
     /* DATE UTILITIES */
+
+    /**
+     * Convert a ZonedDateTime instance to formatted date String.
+     */
     static String format(ZonedDateTime date) {
         return date.format(formatter);
     }
 
+    /**
+     * Convert a formatted date String to a ZonedDateTime instance.
+     */
     static ZonedDateTime parse(String dateString) {
         return ZonedDateTime.parse(dateString, formatter);
     }

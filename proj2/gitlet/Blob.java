@@ -29,7 +29,7 @@ public class Blob implements Dumpable {
     private final String sha1;
 
     /**
-     * @param relativePath relative file path under CWD
+     * @param  relativePath  relative file path under CWD
      * Constructor for blob. The existence of the file is unchecked.
      */
     Blob(String relativePath) {
