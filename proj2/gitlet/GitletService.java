@@ -68,15 +68,15 @@ public class GitletService {
     }
 
     public void log() {
-
+        Repository.printLog();
     }
 
     public void globalLog() {
-
+        Repository.printGlobalLog();
     }
 
-    public boolean find() {
-        return false;
+    public void find(String message) {
+        Repository.printCommitsByMessage(message);
     }
 
     public void status() {
@@ -101,10 +101,5 @@ public class GitletService {
 
     public boolean merge() {
         return false;
-    }
-
-    public void exit(String msg) {
-        Utils.message(msg);
-        repository.exit();
     }
 }

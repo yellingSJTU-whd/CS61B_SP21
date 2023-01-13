@@ -101,4 +101,16 @@ public class Commit implements Dumpable {
     public String getSha1() {
         return sha1;
     }
+
+    public List<String> getParents() {
+        return parents;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }

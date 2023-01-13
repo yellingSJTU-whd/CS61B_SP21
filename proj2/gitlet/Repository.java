@@ -6,13 +6,13 @@ import java.nio.file.Files;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import static gitlet.Utils.*;
-import static java.lang.Thread.sleep;
 
 // TODO: any imports you need here
 
@@ -21,7 +21,7 @@ import static java.lang.Thread.sleep;
  *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
  *
- * @author TODO
+ * @author eYyoz
  */
 public class Repository {
     /**
@@ -64,10 +64,14 @@ public class Repository {
      */
     public static final File HEAD = join(GITLET_DIR, "HEAD");
 
+    private static String template;
+
+    private static String mergeTemplate;
+
     /**
-     * Similar to index file at real git, this field tracks files and theirs status. <br>
-     * Key:    relative file path as String                                          <br>
-     * Value:  file status represented as an entry instance                          <br>
+     * Similar to index file at real git, it tracks files and theirs status.
+     * Key:    relative file path as String
+     * Value:  file status represented as an entry instance
      */
     private final HashMap<String, Entry> index;
 
@@ -76,7 +80,7 @@ public class Repository {
     @SuppressWarnings("unchecked")
     private Repository() {
         if (INDEX.exists() && INDEX.isFile()) {
-            index = Utils.readObject(INDEX, HashMap.class);
+            index = readObject(INDEX, HashMap.class);
         } else {
             index = new HashMap<>();
         }
@@ -97,12 +101,13 @@ public class Repository {
     /**
      * Shanghai zone id.
      */
-    public static final ZoneId shanghai = ZoneId.of("Asia/Shanghai");
+    public static final ZoneId SHANGHAI = ZoneId.of("Asia/Shanghai");
 
     /**
      * Localized epoch for shanghai.
      */
-    public static final ZonedDateTime EPOCH = ZonedDateTime.ofInstant(Instant.EPOCH, shanghai);
+    public static final ZonedDateTime EPOCH =
+            ZonedDateTime.ofInstant(Instant.EPOCH, SHANGHAI);
 
     /**
      * SHA1 HASH mark for removal
@@ -191,7 +196,7 @@ public class Repository {
         if (!REFS.mkdir()) {
             throw error("Failed to create refs");
         }
-        Utils.writeContents(master, initial.get().getSha1());
+        writeContents(master, initial.get().getSha1());
 
         //Move HEAD pointer
         moveHeadTo("master");
@@ -239,7 +244,7 @@ public class Repository {
         //create and store a commit object
         var branch = fetchCurrentBranch();
         var lastCommit = fetchTipOfBranch(branch);
-        var commit = makeAndStoreCommit(map.get(), List.of(lastCommit), message, ZonedDateTime.now(shanghai));
+        var commit = makeAndStoreCommit(map.get(), List.of(lastCommit), message, ZonedDateTime.now(SHANGHAI));
 
         //moves the feature ref
         commit.ifPresent(c -> moveBranchTo(branch, c.getSha1()));
@@ -275,18 +280,86 @@ public class Repository {
     }
 
     /**
-     * Build a String as log from commit tree.
+     * Print log for current branch. Pick first parent when there are two.
      */
-    String buildLog() {
+    static void printLog() {
         var builder = new StringBuilder();
-        var deliminator = "===";
-        var separator = System.getProperty("file.separator");
-        var template = deliminator + separator + "commit " + "%s" + separator + "Date: " + "%s" +separator + "%s" + separator;
-        return null;
+        var sha1 = fetchTipOfBranch(fetchCurrentBranch());
+        var curr = fetchCommit(sha1);
+
+        while (curr != null) {
+            var parents = curr.getParents();
+            var isInitial = parents == null;
+
+            appendCommit(curr, builder);
+            curr = isInitial ? null : fetchCommit(parents.get(0));
+        }
+        message(builder.toString());
     }
 
-    /** Checking utils */
+    static void printGlobalLog() {
+        var builder = new StringBuilder();
+        var commits = plainFilenamesIn(COMMITS);
 
+        if (commits == null) {
+            System.out.println();
+            return;
+        }
+
+        commits.forEach(sha1 -> {
+            var commit = fetchCommit(sha1);
+            appendCommit(commit, builder);
+        });
+        message(builder.toString());
+    }
+
+    static void printCommitsByMessage(String message) {
+        var builder = new StringBuilder();
+        var commits = plainFilenamesIn(COMMITS);
+        if (commits == null) {
+            System.out.println();
+            return;
+        }
+
+        commits.forEach(sha1 -> {
+            var commit = fetchCommit(sha1);
+            var ls = System.lineSeparator();
+
+            if (Objects.equals(commit.getMessage(), message)) {
+                builder.append(sha1).append(ls);
+            }
+        });
+        message(builder.toString());
+    }
+
+    void printStatus() {
+        var template = buildStatusTemplate();
+        var branches = fetchBranches();
+        if (index.isEmpty()) {
+            message(template, branches, "", "", "", "");
+            return;
+        }
+
+//        var staged = new StringBuilder();
+//        var removed = new StringBuilder();
+//        var modifiedNotStaged = new StringBuilder();
+//        var untracked = new StringBuilder();
+//        message(template, branches, staged.toString(), removed.toString(), modifiedNotStaged.toString(), untracked.toString());
+
+        var staged = new ArrayList<String>();
+        var removed = new ArrayList<String>();
+        var modifiedNotStaged = new ArrayList<String>();
+        var untracked = plainFilenamesIn(CWD);
+        index.values().forEach(entry -> {
+                }
+        );
+    }
+
+    /* Checking utils */
+
+    /**
+     * Check if there is a .gitlet folder.
+     */
     private void checkInitialization() {
         if (!GITLET_DIR.exists()) {
             throw error("Not in an initialized Gitlet directory.");
@@ -327,7 +400,7 @@ public class Repository {
     /**
      * Move the HEAD pointer to the branch with given name if exists.
      */
-    void moveHeadTo(String branchName) {
+    private static void moveHeadTo(String branchName) {
         var branchFile = join(REFS, branchName);
         if (!branchFile.exists()) {
             return;
@@ -339,6 +412,43 @@ public class Repository {
             throw new IllegalArgumentException(e.getMessage());
         }
     }
+
+    private static String fetchBranches() {
+        var list = plainFilenamesIn(REFS);
+        var ls = System.lineSeparator();
+        if (list == null) {
+            return ls;
+        }
+        var builder = new StringBuilder();
+        var curr = fetchCurrentBranch();
+        list.forEach(branch -> {
+            builder.append(branch).append(ls);
+        });
+        return builder.toString().replaceFirst(curr, "*" + curr);
+    }
+
+    /**
+     * @return Name of the current branch.
+     */
+    private static String fetchCurrentBranch() {
+        return readContentsAsString(HEAD);
+    }
+
+    /**
+     * @param  branch  the target branch. Its existence is unchecked.
+     * @return SHA-1 HASH of the commit at the tip of given branch
+     */
+    private static String fetchTipOfBranch(String branch) {
+        var tip = join(REFS, branch);
+        return readContentsAsString(tip);
+    }
+
+    private static void moveBranchTo(String branchName, String commitSha1) {
+        var branchFile = join(REFS, branchName);
+        writeContents(branchFile, commitSha1);
+    }
+
+    /* Object system utils*/
 
     /**
      * Fetch staged blobs, which wait to be committed, from index.
@@ -354,7 +464,7 @@ public class Repository {
             var sha1 = entry.stage;
             if (!Objects.equals(entry.repo, sha1)) {
                 blobs.put(entry.path, sha1);
-                //update index file for commit command
+
                 if (!Objects.equals(sha1, removal)) {
                     index.remove(entry.path);
                 } else {
@@ -368,18 +478,8 @@ public class Repository {
         return Optional.of(blobs);
     }
 
-    private String fetchCurrentBranch() {
-        return Utils.readContentsAsString(HEAD);
-    }
-
-    private String fetchTipOfBranch(String branch) {
-        var tip = join(REFS, branch);
-        return Utils.readContentsAsString(tip);
-    }
-
-    private void moveBranchTo(String branchName, String commitSha1) {
-        var branchFile = join(REFS, branchName);
-        Utils.writeContents(branchFile, commitSha1);
+    private static Commit fetchCommit(String commitSha1) {
+        return readObject(join(COMMITS, commitSha1), Commit.class);
     }
 
 
@@ -406,22 +506,15 @@ public class Repository {
      */
     void saveIndex() {
         if (GITLET_DIR.exists() && index != null) {
-            Utils.writeObject(INDEX, index);
+            writeObject(INDEX, index);
         }
     }
 
-    /**
-     * Print the given message and save index, then exit safely.
-     */
-    void exit() {
-        System.exit(0);
-    }
-
     Optional<Commit> makeAndStoreCommit(HashMap<String, String> blobs, List<String> parents, String message, ZonedDateTime date) {
-        Commit commit = new Commit(blobs, parents, message, Utils.format(date));
+        Commit commit = new Commit(blobs, parents, message, format(date));
         var commitFile = join(COMMITS, commit.getSha1());
         if (!commitFile.exists()) {
-            Utils.writeObject(commitFile, commit);
+            writeObject(commitFile, commit);
             return Optional.of(commit);
         }
         return Optional.empty();
@@ -433,7 +526,7 @@ public class Repository {
         if (blobFile.exists()) {
             return Optional.empty();
         }
-        Utils.writeObject(blobFile, blob);
+        writeObject(blobFile, blob);
         return Optional.of(blob);
     }
 
@@ -442,11 +535,11 @@ public class Repository {
      */
     void updateIndex(Blob blob){
         var path = blob.getPath();
-        var time = ZonedDateTime.ofInstant(Instant.ofEpochMilli(join(CWD, path).lastModified()), shanghai);
+        var time = ZonedDateTime.ofInstant(Instant.ofEpochMilli(join(CWD, path).lastModified()), SHANGHAI);
         var entry = index.get(path);
         var sha1 = blob.getSha1();
 
-        entry.mtime = Utils.format(time);
+        entry.mtime = format(time);
         entry.wdir = sha1;
         entry.stage = sha1;
     }
@@ -456,13 +549,86 @@ public class Repository {
         for (Entry entry : index.values()) {
             String sha1 = entry.stage;
             entry.repo = sha1;
-            entry.mtime = Utils.format(ZonedDateTime.now(shanghai));
+            entry.mtime = format(ZonedDateTime.now(SHANGHAI));
             blobs.put(entry.path, sha1);
         }
         return blobs;
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+
+    /* Logging utils */
+
+    private static void appendCommit(Commit commit, StringBuilder builder) {
+        if (commit == null) {
+            return;
+        }
+
+        var parents = commit.getParents();
+        var isInitial = parents == null;
+
+        if (isInitial || parents.size() < 2) {
+            builder.append(String.format(fetchTemplate(),
+                    commit.getSha1(), commit.getDate(), commit.getMessage()));
+        } else {
+            builder.append(String.format(fetchMergeTemplate(), commit.getSha1(),
+                    parents.get(0).substring(0, 7),
+                    parents.get(1).substring(0, 7),
+                    commit.getDate(), commit.getMessage()));
+        }
+    }
+
+    private static String fetchTemplate() {
+        if (template == null) {
+            template = buildTemplate();
+        }
+        return template;
+    }
+
+    private static String fetchMergeTemplate() {
+        if (mergeTemplate == null) {
+            mergeTemplate = buildMergeTemplate();
+        }
+        return mergeTemplate;
+    }
+
+    private static String buildTemplate() {
+        var delimiter = "===";
+        var ls = System.lineSeparator();
+
+        return delimiter + ls
+                + "commit %s" + ls
+                + "Date: %s" + ls
+                + "%s" + ls;
+    }
+
+    private static String buildMergeTemplate() {
+        var delimiter = "===";
+        var ls = System.lineSeparator();
+
+        return delimiter + ls
+                + "commit %s" + ls
+                + "Merge: %s %s" + ls
+                + "Date: %s" + ls
+                + "%s" + ls;
+    }
+
+    private static String buildStatusTemplate() {
+        var delimiter = "===";
+        var ls = System.lineSeparator();
+
+        return delimiter + " Branches " + delimiter + ls
+                + "%s" + ls
+                + delimiter + " Staged Files " + delimiter + ls
+                + "%s" + ls
+                + delimiter + " Removed Files " + delimiter + ls
+                + "%s" + ls
+                + delimiter + " Modifications Not Staged For Commit " + delimiter + ls
+                + "%s" + ls
+                + delimiter + " Untracked Files " + delimiter + ls
+                + "%s";
+    }
+
+    public static void main(String[] args) {
 //git status && template
 //        String template = "=== Branches ===" + "%n" +
 //                "%s" + "%n";
@@ -490,7 +656,6 @@ public class Repository {
 //        System.out.println(time);
 //        var converted = ZonedDateTime.ofInstant(Instant.ofEpochMilli(time), shanghai);
 //        System.out.println(converted);
-
-
+        getInstance().printStatus();
     }
 }
