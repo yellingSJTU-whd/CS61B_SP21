@@ -14,12 +14,15 @@ import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Locale;
+
+import static gitlet.Repository.SHANGHAI;
 
 
 /**
@@ -275,7 +278,15 @@ class Utils {
     /**
      * Convert a formatted date String to a ZonedDateTime instance.
      */
-    static ZonedDateTime parse(String dateString) {
-        return ZonedDateTime.parse(dateString, formatter);
+    static ZonedDateTime parse(String date) {
+        return ZonedDateTime.parse(date, formatter);
+    }
+
+    static long toEpochMilli(String date) {
+        return parse(date).toInstant().toEpochMilli();
+    }
+
+    static String format(long epochMilli) {
+        return formatter.format(Instant.ofEpochMilli(epochMilli));
     }
 }

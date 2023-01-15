@@ -106,13 +106,12 @@ public class Repository {
     /**
      * Localized epoch for shanghai.
      */
-    public static final ZonedDateTime EPOCH =
-            ZonedDateTime.ofInstant(Instant.EPOCH, SHANGHAI);
+    public static final ZonedDateTime EPOCH = Instant.EPOCH.atZone(SHANGHAI);
 
     /**
-     * SHA1 HASH mark for removal
+     * SHA1 HASH mark for REMOVAL
      */
-    public static final String removal = "0".repeat(UID_LENGTH);
+    public static final String REMOVAL = "0".repeat(UID_LENGTH);
 
     /**
      * An entry represents a file, tracking its status by keeping sha1 under three trees.
@@ -253,7 +252,7 @@ public class Repository {
 
     /**
      * Remove a file from Gitlet if staged or tracked. If staged,
-     * unstage it. If tracked, marked for removal and delete from
+     * unstage it. If tracked, marked for REMOVAL and delete from
      * working tree if not already done. Throw exception otherwise.
      */
     void removeFromIndex(String fileName) {
@@ -273,8 +272,8 @@ public class Repository {
         if (!Objects.equals(stage, repo)) {
             index.remove(fileName);
         } else {
-            //stage for removal, the file will remove from index at next commit
-            entry.stage = removal;
+            //stage for REMOVAL, the file will remove from index at next commit
+            entry.stage = REMOVAL;
             file.delete();
         }
     }
@@ -294,7 +293,7 @@ public class Repository {
             appendCommit(curr, builder);
             curr = isInitial ? null : fetchCommit(parents.get(0));
         }
-        message(builder.toString());
+        System.out.println(builder);
     }
 
     static void printGlobalLog() {
@@ -305,22 +304,21 @@ public class Repository {
             System.out.println();
             return;
         }
-
         commits.forEach(sha1 -> {
             var commit = fetchCommit(sha1);
             appendCommit(commit, builder);
         });
-        message(builder.toString());
+        System.out.println(builder);
     }
 
     static void printCommitsByMessage(String message) {
         var builder = new StringBuilder();
         var commits = plainFilenamesIn(COMMITS);
+
         if (commits == null) {
             System.out.println();
             return;
         }
-
         commits.forEach(sha1 -> {
             var commit = fetchCommit(sha1);
             var ls = System.lineSeparator();
@@ -329,30 +327,61 @@ public class Repository {
                 builder.append(sha1).append(ls);
             }
         });
-        message(builder.toString());
+
+        if (builder.length()==0){
+            throw error("Found no commit with that message.");
+        }
+        System.out.println(builder);
     }
 
     void printStatus() {
         var template = buildStatusTemplate();
         var branches = fetchBranches();
         if (index.isEmpty()) {
-            message(template, branches, "", "", "", "");
+            System.out.printf(template, branches, "", "", "", "");
             return;
         }
-
-//        var staged = new StringBuilder();
-//        var removed = new StringBuilder();
-//        var modifiedNotStaged = new StringBuilder();
-//        var untracked = new StringBuilder();
-//        message(template, branches, staged.toString(), removed.toString(), modifiedNotStaged.toString(), untracked.toString());
 
         var staged = new ArrayList<String>();
         var removed = new ArrayList<String>();
         var modifiedNotStaged = new ArrayList<String>();
         var untracked = plainFilenamesIn(CWD);
+        var deletedPostfix = " (deleted)";
+        var modifiedPostfix = " (modified)";
         index.values().forEach(entry -> {
+                    var path = entry.path;
+                    var file = join(CWD, path);
+                    var stage = entry.stage;
+                    var repo = entry.repo;
+                    var mtime = entry.mtime;
+                    if (untracked != null) {
+                        untracked.remove(path);
+                    }
+
+                    //check for difference between staging area and commit tree,
+                    //including staged modification or removal.
+                    if (Objects.equals(REMOVAL, stage)) {
+                        removed.add(path);
+                    } else if (!Objects.equals(stage, repo)) {
+                        staged.add(path);
+                    }
+
+                    //check for difference between working tree and index file,
+                    //including unstaged modification or removal.
+                    if (!file.exists()) {
+                        modifiedNotStaged.add(path + deletedPostfix);
+                        entry.wdir = REMOVAL;
+                    } else {
+                        var lastModified = file.lastModified();
+                        if (!Objects.equals(toEpochMilli(mtime), lastModified)) {
+                            modifiedNotStaged.add(path + modifiedPostfix);
+                            entry.mtime = format(lastModified);
+                            entry.wdir = sha1(readContents(file));
+                        }
+                    }
                 }
         );
+        System.out.printf(template, branches, reduce(staged), reduce(removed), reduce(modifiedNotStaged), untracked == null ? "" : reduce(untracked));
     }
 
     /* Checking utils */
@@ -465,7 +494,7 @@ public class Repository {
             if (!Objects.equals(entry.repo, sha1)) {
                 blobs.put(entry.path, sha1);
 
-                if (!Objects.equals(sha1, removal)) {
+                if (!Objects.equals(sha1, REMOVAL)) {
                     index.remove(entry.path);
                 } else {
                     entry.repo = sha1;
@@ -481,7 +510,6 @@ public class Repository {
     private static Commit fetchCommit(String commitSha1) {
         return readObject(join(COMMITS, commitSha1), Commit.class);
     }
-
 
     /**
      * Delete the target file if it is a plain file, otherwise delete the directory and contained files.
@@ -535,7 +563,7 @@ public class Repository {
      */
     void updateIndex(Blob blob){
         var path = blob.getPath();
-        var time = ZonedDateTime.ofInstant(Instant.ofEpochMilli(join(CWD, path).lastModified()), SHANGHAI);
+        var time = Instant.ofEpochMilli(join(CWD, path).lastModified()).atZone(SHANGHAI);
         var entry = index.get(path);
         var sha1 = blob.getSha1();
 
@@ -628,6 +656,17 @@ public class Repository {
                 + "%s";
     }
 
+    /**
+     * Sort a list destructive and reduce to a new String,
+     * with each element in a row.
+     */
+    private static String reduce(List<String> list) {
+        var ls = System.lineSeparator();
+        return list.stream()
+                .sorted(String::compareTo)
+                .reduce("", (str1, str2) -> str1 + str2 + ls);
+    }
+
     public static void main(String[] args) {
 //git status && template
 //        String template = "=== Branches ===" + "%n" +
@@ -656,6 +695,7 @@ public class Repository {
 //        System.out.println(time);
 //        var converted = ZonedDateTime.ofInstant(Instant.ofEpochMilli(time), shanghai);
 //        System.out.println(converted);
-        getInstance().printStatus();
+
+        System.out.printf(buildStatusTemplate(), "", "", "", "", "");
     }
 }

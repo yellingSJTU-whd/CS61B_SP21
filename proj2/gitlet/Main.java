@@ -1,5 +1,7 @@
 package gitlet;
 
+import java.util.Objects;
+
 /**
  * Driver class for Gitlet, a subset of the Git version-control system.
  *
@@ -22,36 +24,43 @@ public class Main {
         var errMsg = "Incorrect operands";
         switch (firstArg) {
             case "init" -> {
-                checkLength(args, 1);
+                checkLength(len, 1);
                 GitletService.getInstance().init();
             }
             case "add" -> {
-                checkLength(args, 2);
+                checkLength(len, 2);
                 GitletService.getInstance().add(args[1]);
             }
             case "commit" -> {
                 if (len == 1 || args[1].isBlank()) {
                     exitWithMsg("Please enter a commit message.");
                 }
-                checkLength(args, 2);
+                checkLength(len, 2);
                 GitletService.getInstance().commit(args[1]);
-
             }
             case "rm" -> {
-                checkLength(args, 2);
+                checkLength(len, 2);
                 GitletService.getInstance().rm(args[1]);
             }
             case "log" -> {
-                checkLength(args, 1);
-                GitletService.getInstance().log();
+                checkLength(len, 1);
+                GitletService.log();
             }
             case "global-log" -> {
-                checkLength(args, 1);
-                GitletService.getInstance().globalLog();
+                checkLength(len, 1);
+                GitletService.globalLog();
             }
             case "find" -> {
-                checkLength(args, 2);
-                GitletService.getInstance().find(args[1]);
+                checkLength(len, 2);
+                GitletService.find(args[1]);
+            }
+            case "status" -> {
+                checkLength(len, 2);
+                GitletService.getInstance().status();
+            }
+            case "checkout" -> {
+                checkLength(len, 2, 4);
+                GitletService.getInstance().checkout();
             }
             // TODO: FILL THE REST IN
             default -> {
@@ -65,8 +74,14 @@ public class Main {
         System.exit(0);
     }
 
-    private static void checkLength(String[] args, int length) {
-        if (args.length != length) {
+    private static void checkLength(int length, int expected ) {
+        if (length != expected) {
+            exitWithMsg("Incorrect operands");
+        }
+    }
+
+    private static void checkLength(int length, int min, int max) {
+        if (length < min || length > max) {
             exitWithMsg("Incorrect operands");
         }
     }

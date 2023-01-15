@@ -1,5 +1,7 @@
 package gitlet;
 
+import java.util.Objects;
+
 import static gitlet.Repository.GITLET_DIR;
 
 /**
@@ -40,7 +42,7 @@ public class GitletService {
             if (repository.makeBlob(path)) {
                 repository.saveIndex();
             }
-        } catch (GitletException e){
+        } catch (GitletException e) {
             Utils.message(e.getMessage());
             System.exit(0);
         }
@@ -67,24 +69,28 @@ public class GitletService {
         }
     }
 
-    public void log() {
+    public static void log() {
         Repository.printLog();
     }
 
-    public void globalLog() {
+    public static void globalLog() {
         Repository.printGlobalLog();
     }
 
-    public void find(String message) {
-        Repository.printCommitsByMessage(message);
+    public static void find(String message) {
+        try {
+            Repository.printCommitsByMessage(message);
+        } catch (GitletException e) {
+            Utils.message(e.getMessage());
+            System.exit(0);
+        }
     }
 
     public void status() {
-
+        repository.printStatus();
     }
 
-    public boolean checkout() {
-        return false;
+    public void checkout(String... args) {
     }
 
     public boolean branch() {
