@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -17,10 +18,12 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 import static gitlet.Repository.SHANGHAI;
 
@@ -192,13 +195,17 @@ class Utils {
      * Returns null if DIR does not denote a directory.
      */
     static List<String> plainFilenamesIn(File dir) {
-        String[] files = dir.list(PLAIN_FILES);
+        var files = dir.list();
         if (files == null) {
             return null;
-        } else {
-            Arrays.sort(files);
-            return Arrays.asList(files);
         }
+        var plainFiles = new ArrayList<String>();
+        for (String file : files) {
+            if (PLAIN_FILES.accept(dir, file)) {
+                plainFiles.add(file);
+            }
+        }
+        return plainFiles;
     }
 
     /**
@@ -207,6 +214,18 @@ class Utils {
      */
     static List<String> plainFilenamesIn(String dir) {
         return plainFilenamesIn(new File(dir));
+    }
+
+    /**
+     * Apply given action to all plain files under specified directory.
+     * Throw Exception if an I/O error occurs.
+     */
+    static void applyToPlainFilesIn(Path dir, Consumer<? super Path> action) {
+        try (var plainFiles = Files.newDirectoryStream(dir, path -> path.toFile().isFile())) {
+            plainFiles.forEach(action);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /* OTHER FILE UTILITIES */
@@ -241,7 +260,7 @@ class Utils {
             objectStream.close();
             return stream.toByteArray();
         } catch (IOException excp) {
-            throw error("Internal error serializing commit.");
+            throw error("Internal error serializing object.");
         }
     }
 
@@ -269,23 +288,29 @@ class Utils {
     /* DATE UTILITIES */
 
     /**
-     * Convert a ZonedDateTime instance to formatted date String.
+     * Format a ZonedDateTime to a String.
      */
     static String format(ZonedDateTime date) {
         return date.format(formatter);
     }
 
     /**
-     * Convert a formatted date String to a ZonedDateTime instance.
+     * Parse a String to a ZonedDateTime.
      */
     static ZonedDateTime parse(String date) {
         return ZonedDateTime.parse(date, formatter);
     }
 
+    /**
+     * Convert a String to epoch millisecond as long.
+     */
     static long toEpochMilli(String date) {
         return parse(date).toInstant().toEpochMilli();
     }
 
+    /**
+     * Format epoch millisecond to a String.
+     */
     static String format(long epochMilli) {
         return formatter.format(Instant.ofEpochMilli(epochMilli));
     }

@@ -28,11 +28,13 @@ public class GitletService {
         return service;
     }
 
-    public void init() {
+    public static void init() {
         try {
-            repository.buildGitletRepository();
+            if (!Repository.buildGitletRepository()) {
+                Repository.sanitize(GITLET_DIR);
+            }
         } catch (GitletException e) {
-            repository.sanitize(GITLET_DIR);
+            Utils.message(e.getMessage());
             System.exit(0);
         }
     }
@@ -70,11 +72,21 @@ public class GitletService {
     }
 
     public static void log() {
-        Repository.printLog();
+        try {
+            Repository.printLog();
+        } catch (GitletException e) {
+            Utils.message(e.getMessage());
+            System.exit(0);
+        }
     }
 
     public static void globalLog() {
-        Repository.printGlobalLog();
+        try {
+            Repository.printGlobalLog();
+        } catch (GitletException e) {
+            Utils.message(e.getMessage());
+            System.exit(0);
+        }
     }
 
     public static void find(String message) {
@@ -87,10 +99,27 @@ public class GitletService {
     }
 
     public void status() {
-        repository.printStatus();
+        try {
+            repository.printStatus();
+        } catch (GitletException e) {
+            Utils.message(e.getMessage());
+            System.exit(0);
+        }
     }
 
     public void checkout(String... args) {
+        var len = args.length;
+        switch (len) {
+            case 2 -> {
+                repository.checkoutBranch(args[1]);
+            }
+            case 3 -> {
+                repository.checkoutFile(args[2]);
+            }
+            case 4 -> {
+                repository.checkoutFile(args[1], args[3]);
+            }
+        }
     }
 
     public boolean branch() {

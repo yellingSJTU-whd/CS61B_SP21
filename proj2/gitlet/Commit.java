@@ -113,4 +113,8 @@ public class Commit implements Dumpable {
     public String getMessage() {
         return message;
     }
+
+    public HashMap<String, String> getBlobs() {
+        return blobs;
+    }
 }

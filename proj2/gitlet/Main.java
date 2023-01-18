@@ -25,7 +25,7 @@ public class Main {
         switch (firstArg) {
             case "init" -> {
                 checkLength(len, 1);
-                GitletService.getInstance().init();
+                GitletService.init();
             }
             case "add" -> {
                 checkLength(len, 2);
@@ -60,7 +60,7 @@ public class Main {
             }
             case "checkout" -> {
                 checkLength(len, 2, 4);
-                GitletService.getInstance().checkout();
+                GitletService.getInstance().checkout(args);
             }
             // TODO: FILL THE REST IN
             default -> {
