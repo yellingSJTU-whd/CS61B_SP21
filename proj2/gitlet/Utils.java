@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static gitlet.Repository.SHANGHAI;
@@ -108,6 +109,24 @@ class Utils {
         return restrictedDelete(new File(file));
     }
 
+    /**
+     * Delete the file if it is a plain file, otherwise delete the directory and contained files.
+     */
+    static void sanitize(File filename) {
+        if (filename == null || !filename.exists()) {
+            return;
+        }
+        if (filename.isDirectory()) {
+            var optional = Optional.ofNullable(filename.listFiles());
+            optional.ifPresent(files -> {
+                for (File file : files) {
+                    sanitize(file);
+                }
+            });
+        }
+        filename.delete();
+    }
+
     /* READING AND WRITING FILE CONTENTS */
 
     /**
@@ -153,6 +172,7 @@ class Utils {
             }
             str.close();
         } catch (IOException | ClassCastException excp) {
+            System.out.println(excp.getClass().getName());
             throw new IllegalArgumentException(excp.getMessage());
         }
     }

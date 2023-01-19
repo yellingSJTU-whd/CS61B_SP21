@@ -16,7 +16,7 @@ public class Blob implements Dumpable {
     /**
      * Relative path under current working directory.
      */
-    private final String path;
+    private final String filename;
 
     /**
      * Content of the underlying file.
@@ -33,7 +33,7 @@ public class Blob implements Dumpable {
      * Constructor for blob. The existence of the file is unchecked.
      */
     Blob(String relativePath) {
-        path = relativePath;
+        filename = relativePath;
         content = readContentsAsString(join(CWD, relativePath));
         sha1 = sha1(content);
     }
@@ -55,14 +55,14 @@ public class Blob implements Dumpable {
     /**
      * @return relative path of the file as String
      */
-    public String getPath() {
-        return path;
+    public String getFilename() {
+        return filename;
     }
 
     @Override
     public void dump() {
         String info = "This is a Blob" + "%n"
-                + "Relative path : " + path + "%n"
+                + "Relative path : " + filename + "%n"
                 + content + "%n";
         System.out.println(info);
     }

@@ -62,6 +62,17 @@ public class Main {
                 checkLength(len, 2, 4);
                 GitletService.getInstance().checkout(args);
             }
+            case "branch" -> {
+                checkLength(len, 2);
+                GitletService.branch(args[1]);
+            }
+            case "rm-branch" -> {
+                checkLength(len, 2);
+                GitletService.rmBranch(args[1]);
+            }
+            case "reset" -> {
+                checkLength(len, 2);
+            }
             // TODO: FILL THE REST IN
             default -> {
                 exitWithMsg("No command with that name exists.");

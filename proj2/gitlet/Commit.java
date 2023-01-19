@@ -22,7 +22,7 @@ import static gitlet.Utils.join;
 public class Commit implements Dumpable {
     /**
      * Blobs included in this commit.
-     * Key:   relative path under CWD
+     * Key:   file name
      * Value: SHA-1 HASH of the blob
      */
     private final HashMap<String, String> blobs;
@@ -54,19 +54,19 @@ public class Commit implements Dumpable {
         this.message = message;
         this.date = date;
 
-        List<Object> list = new ArrayList<>();
+        List<Object> content = new ArrayList<>();
         if (blobs != null) {
             for (Map.Entry<String, String> entry : blobs.entrySet()) {
-                list.add(entry.getKey());
-                list.add(entry.getValue());
+                content.add(entry.getKey());
+                content.add(entry.getValue());
             }
         }
         if (parents != null) {
-            list.addAll(parents);
+            content.addAll(parents);
         }
-        list.add(message);
-        list.add(this.date);
-        sha1 = Utils.sha1(list);
+        content.add(message);
+        content.add(this.date);
+        sha1 = Utils.sha1(content);
     }
 
     @Override

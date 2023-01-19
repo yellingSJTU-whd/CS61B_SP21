@@ -31,7 +31,7 @@ public class GitletService {
     public static void init() {
         try {
             if (!Repository.buildGitletRepository()) {
-                Repository.sanitize(GITLET_DIR);
+                Utils.sanitize(GITLET_DIR);
             }
         } catch (GitletException e) {
             Utils.message(e.getMessage());
@@ -45,7 +45,7 @@ public class GitletService {
                 repository.saveIndex();
             }
         } catch (GitletException e) {
-            Utils.message(e.getMessage());
+            System.out.println(e.getMessage());
             System.exit(0);
         }
     }
@@ -56,7 +56,7 @@ public class GitletService {
                 repository.saveIndex();
             }
         } catch (GitletException e) {
-            Utils.message(e.getMessage());
+            System.out.println(e.getMessage());
             System.exit(0);
         }
     }
@@ -66,7 +66,7 @@ public class GitletService {
             repository.removeFromIndex(fileName);
             repository.saveIndex();
         } catch (GitletException e) {
-            Utils.message(e.getMessage());
+            System.out.println(e.getMessage());
             System.exit(0);
         }
     }
@@ -75,7 +75,7 @@ public class GitletService {
         try {
             Repository.printLog();
         } catch (GitletException e) {
-            Utils.message(e.getMessage());
+            System.out.println(e.getMessage());
             System.exit(0);
         }
     }
@@ -84,7 +84,7 @@ public class GitletService {
         try {
             Repository.printGlobalLog();
         } catch (GitletException e) {
-            Utils.message(e.getMessage());
+            System.out.println(e.getMessage());
             System.exit(0);
         }
     }
@@ -93,7 +93,7 @@ public class GitletService {
         try {
             Repository.printCommitsByMessage(message);
         } catch (GitletException e) {
-            Utils.message(e.getMessage());
+            System.out.println(e.getMessage());
             System.exit(0);
         }
     }
@@ -102,32 +102,51 @@ public class GitletService {
         try {
             repository.printStatus();
         } catch (GitletException e) {
-            Utils.message(e.getMessage());
+            System.out.println(e.getMessage());
             System.exit(0);
         }
     }
 
     public void checkout(String... args) {
         var len = args.length;
-        switch (len) {
-            case 2 -> {
-                repository.checkoutBranch(args[1]);
+        var modified = false;
+        try {
+            switch (len) {
+                case 2 -> {
+                    modified = repository.checkoutBranch(args[1]);
+                }
+                case 3 -> {
+                    modified = repository.checkoutFile(args[2]);
+                }
+                case 4 -> {
+                    modified = repository.checkoutFile(args[1], args[3]);
+                }
             }
-            case 3 -> {
-                repository.checkoutFile(args[2]);
-            }
-            case 4 -> {
-                repository.checkoutFile(args[1], args[3]);
-            }
+        } catch (GitletException e) {
+            System.out.println(e.getMessage());
+            System.exit(0);
+        }
+        if (modified) {
+            repository.saveIndex();
         }
     }
 
-    public boolean branch() {
-        return false;
+    public static void branch(String branch) {
+        try {
+            Repository.createBranch(branch);
+        } catch (GitletException e) {
+            System.out.println(e.getMessage());
+            System.exit(0);
+        }
     }
 
-    public boolean rmBranch() {
-        return false;
+    public static void rmBranch(String branch) {
+        try {
+            Repository.removeBranch(branch);
+        } catch (GitletException e) {
+            System.out.println(e.getMessage());
+            System.exit(0);
+        }
     }
 
     public boolean reset() {
