@@ -29,19 +29,27 @@ public class Blob implements Dumpable {
     private final String sha1;
 
     /**
-     * @param  relativePath  relative file path under CWD
+     * @param  filename  relative file path under CWD
      * Constructor for blob. The existence of the file is unchecked.
      */
-    Blob(String relativePath) {
-        filename = relativePath;
-        content = readContentsAsString(join(CWD, relativePath));
-        sha1 = sha1(content);
+    Blob(String filename) {
+        this.filename = filename;
+        if (filename == null) {
+            sha1 = null;
+            content = null;
+        } else {
+            content = readContentsAsString(join(CWD, filename));
+            sha1 = sha1(content);
+        }
     }
 
     /**
      * @return content of the underlying file
      */
     public String getContent() {
+        if (content == null) {
+            return "";
+        }
         return content;
     }
 

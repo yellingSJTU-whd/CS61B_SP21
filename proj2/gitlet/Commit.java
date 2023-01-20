@@ -54,19 +54,23 @@ public class Commit implements Dumpable {
         this.message = message;
         this.date = date;
 
-        List<Object> content = new ArrayList<>();
+        var content = new ArrayList<>();
         if (blobs != null) {
-            for (Map.Entry<String, String> entry : blobs.entrySet()) {
-                content.add(entry.getKey());
-                content.add(entry.getValue());
-            }
+            blobs.forEach((key, value) -> {
+                content.add(key);
+                content.add(value);
+            });
         }
         if (parents != null) {
             content.addAll(parents);
         }
-        content.add(message);
-        content.add(this.date);
-        sha1 = Utils.sha1(content);
+        if (message != null) {
+            content.add(message);
+        }
+        if (date != null) {
+            content.add(date);
+        }
+        sha1 = content.isEmpty() ? null : Utils.sha1(content);
     }
 
     @Override
@@ -115,6 +119,9 @@ public class Commit implements Dumpable {
     }
 
     public HashMap<String, String> getBlobs() {
+        if (blobs == null) {
+            return new HashMap<>(0);
+        }
         return blobs;
     }
 }

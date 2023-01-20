@@ -3,7 +3,6 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.file.Files;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -12,11 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static gitlet.Utils.*;
@@ -242,7 +236,7 @@ public class Repository {
         checkInitialization();
 
         //check for staged files to commit, also update the index if possible
-        var map = fetchStagedBlobsAndUpdateIndex();
+        var map = fetchStagedAndUpdateIndex();
         if (map.isEmpty()) {
             throw error("No changes added to the commit.");
         }
@@ -406,9 +400,7 @@ public class Repository {
         checkInitialization();
 
         //check commit
-        if (!checkCommit(commitSha1)) {
-            throw error("No commit with that id exists.");
-        }
+        checkCommit(commitSha1);
 
         //check file
         var blobs = fetchCommit(commitSha1).getBlobs();
@@ -436,72 +428,33 @@ public class Repository {
         return true;
     }
 
+    /**
+     * Check out tip of the given branch if possible.
+     * Throw GitletException at failure cases.
+     */
     boolean checkoutBranch(String branch) {
         checkInitialization();
-
-        //check branch existence
         if (!checkBranch(branch)) {
             throw error("No such branch exists.");
         }
-
-        //check whether the current branch is the branch checked-out
         var curr = fetchCurrentBranch();
         if (Objects.equals(curr, branch)) {
             throw error("No need to checkout the current branch.");
         }
 
-        //check whether there is untracked file in the way
-        var files = plainFilenamesIn(CWD);
-        var blobs = fetchCommit(fetchTipOfBranch(branch)).getBlobs();
-        var identical = new ArrayList<String>();
-        if (files != null) {
-            files.removeAll(index.keySet());
-            files.retainAll(blobs.keySet());
-            files.forEach(filename -> {
-                var repoSha1 = blobs.get(filename);
-                var wdirSha1 = sha1(readContentsAsString(join(CWD, filename)));
-                if (Objects.equals(repoSha1, wdirSha1)) {
-                    identical.add(filename);
-                } else {
-                    files.remove(filename);
-                }
-            });
-        }
-        if (files != null && !files.isEmpty()) {
-            throw error("There is an untracked file in the way;"
-                    + " delete it, or add and commit it first.");
-        }
-
-        //create or overwrite files and update index
-        var modified = new AtomicReference<Boolean>(false);
-        blobs.forEach((filename, sha1) -> {
-            if (!identical.contains(filename)) {
-                var file = join(CWD, filename);
-                var blob = fetchBlob(sha1);
-
-                writeContents(file, blob.getContent());
-                modified.set(true);
-                var mtime = format(file.lastModified());
-                index.put(filename, new Entry(mtime, filename, sha1, sha1, sha1));
-            }
-        });
-
-        //delete file and update index
-        index.keySet()
-                .stream()
-                .filter(fileName -> !blobs.containsKey(fileName))
-                .map(fileName -> join(CWD, fileName))
-                .forEach(filename -> {
-                    modified.set(true);
-                    sanitize(filename);
-                });
-        index.keySet().retainAll(blobs.keySet());
-
-        //move HEAD pointer
-        moveHeadTo(branch);
-
-        return modified.get();
+        return checkAndReset(fetchTipOfBranch(branch), branch);
     }
+
+//    /**
+//     * Check out the commit corresponding to given SHA-1 Hash if possible.
+//     * Throw GitletException at failure cases.
+//     */
+//    boolean checkoutCommit(String sha1) {
+//        checkInitialization();
+//        checkCommit(sha1);
+//
+//        return checkAndReset(sha1)
+//    }
 
     static void createBranch(String branch) {
         checkInitialization();
@@ -555,15 +508,10 @@ public class Repository {
     /**
      * Check whether the given SHA1 HASH match a saved commit object.
      */
-    boolean checkCommit(String commitSha1) {
-        return join(COMMITS, commitSha1).exists();
-    }
-
-    /**
-     * @return whether there is no any untracked file vulnerable to RESET command.
-     */
-    boolean checkIfSafeToReset() {
-        return false;
+    void checkCommit(String sha1) {
+        if (!join(COMMITS, sha1.substring(0, 2), sha1.substring(2)).exists()) {
+            throw error("No commit with that id exists.");
+        }
     }
 
     /* Reference utils*/
@@ -614,7 +562,7 @@ public class Repository {
      * Fetch staged blobs, which wait to be committed, from index.
      * Also update if there is any files staged.
      */
-    private Optional<HashMap<String, String>> fetchStagedBlobsAndUpdateIndex() {
+    private Optional<HashMap<String, String>> fetchStagedAndUpdateIndex() {
         if (index.isEmpty()) {
             return Optional.empty();
         }
@@ -638,15 +586,83 @@ public class Repository {
         return Optional.of(blobs);
     }
 
-    private static Commit fetchCommit(String commitSha1) {
-        return readObject(join(COMMITS, commitSha1), Commit.class);
+    private boolean checkAndReset(String commitSha1, String branch) {
+        var files = plainFilenamesIn(CWD);
+        var blobs = fetchCommit(commitSha1).getBlobs();
+        var identical = new ArrayList<String>();
+        if (files != null) {
+            files.removeAll(index.keySet());
+            files.retainAll(blobs.keySet());
+            files.forEach(filename -> {
+                var repoSha1 = blobs.get(filename);
+                var wdirSha1 = sha1(readContentsAsString(join(CWD, filename)));
+                if (Objects.equals(repoSha1, wdirSha1)) {
+                    identical.add(filename);
+                } else {
+                    files.remove(filename);
+                }
+            });
+        }
+        if (files != null && !files.isEmpty()) {
+            throw error("There is an untracked file in the way;"
+                    + " delete it, or add and commit it first.");
+        }
+
+        //create or overwrite files and update index
+        var modified = new AtomicReference<Boolean>(false);
+        blobs.forEach((filename, sha1) -> {
+            if (!identical.contains(filename)) {
+                var file = join(CWD, filename);
+                var blob = fetchBlob(sha1);
+
+                writeContents(file, blob.getContent());
+                modified.set(true);
+                var mtime = format(file.lastModified());
+                index.put(filename, new Entry(mtime, filename, sha1, sha1, sha1));
+            }
+        });
+
+        //delete file and update index
+        index.keySet()
+                .stream()
+                .filter(fileName -> !blobs.containsKey(fileName))
+                .map(fileName -> join(CWD, fileName))
+                .forEach(filename -> {
+                    modified.set(true);
+                    sanitize(filename);
+                });
+        index.keySet().retainAll(blobs.keySet());
+        moveHeadTo(branch);
+        return modified.get();
     }
 
-    private static Blob fetchBlob(String blobSha1) {
-        return readObject(join(BLOBS, blobSha1), Blob.class);
+    private static Commit fetchCommit(String sha1) {
+        var dir = join(COMMITS, sha1.substring(0, 2));
+        var files = plainFilenamesIn(dir);
+        if (files == null) {
+            return null;
+        }
+        var remainder = sha1.substring(2);
+        return files.stream()
+                .filter(filename -> filename.startsWith(remainder))
+                .findFirst()
+                .map(filename -> readObject(join(dir, filename), Commit.class))
+                .orElseThrow(RuntimeException::new);
     }
 
-
+    private static Blob fetchBlob(String sha1) {
+        var dir = join(BLOBS, sha1.substring(0, 2));
+        var files = plainFilenamesIn(dir);
+        if (files == null) {
+            return null;
+        }
+        var remainder = sha1.substring(2);
+        return files.stream()
+                .filter(filename -> filename.startsWith(remainder))
+                .findFirst()
+                .map(filename -> readObject(join(dir, filename), Blob.class))
+                .orElseThrow(RuntimeException::new);
+    }
 
     /**
      * Save index if gitlet repository initialized and there are files been tracked.
@@ -657,42 +673,26 @@ public class Repository {
         }
     }
 
-    static Optional<Commit> makeAndStoreCommit(HashMap<String, String> blobs, List<String> parents, String message, ZonedDateTime date) {
+    static Optional<Commit> makeAndStoreCommit(HashMap<String, String> blobs,
+                                               List<String> parents, String message, ZonedDateTime date) {
         var commit = new Commit(blobs, parents, message, format(date));
         var sha1 = commit.getSha1();
-//        var dir = join(COMMITS, sha1.substring(0,2));
-//        var commitFile = join(dir, sha1.substring(2));
-//
-//        if (commitFile.exists()) {
-//            return Optional.empty();
-//        }
-//        dir.mkdirs();
-//        writeObject(commitFile, commit);
-//        return Optional.of(commit);
         return makeAndStore(commit, sha1);
     }
 
    static Optional<Blob> makeAndStoreBlob(String path) {
        var blob = new Blob(path);
        var sha1 = blob.getSha1();
-//       var dir = join(BLOBS, sha1.substring(0, 2));
-//       var blobFile = join(dir, sha1.substring(2));
-//
-//       if (blobFile.exists()) {
-//           return Optional.empty();
-//       }
-//       dir.mkdirs();
-//       writeObject(blobFile, blob);
-//       return Optional.of(blob);
-       return makeAndStore(blob,sha1);
+       return makeAndStore(blob, sha1);
    }
 
    static <T> Optional<T> makeAndStore(T t, String sha1) {
        File dir;
+       var prefix = sha1.substring(0,2);
        if (Objects.equals(t.getClass(), Commit.class)) {
-           dir = join(COMMITS, sha1.substring(0, 2));
+           dir = join(COMMITS, prefix);
        } else {
-           dir = join(BLOBS, sha1.substring(0, 2));
+           dir = join(BLOBS, prefix);
        }
        var file = join(dir, sha1.substring(2));
        if (file.exists()) {
