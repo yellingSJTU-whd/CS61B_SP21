@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -117,12 +118,10 @@ class Utils {
             return;
         }
         if (filename.isDirectory()) {
-            var optional = Optional.ofNullable(filename.listFiles());
-            optional.ifPresent(files -> {
-                for (File file : files) {
-                    sanitize(file);
-                }
-            });
+            Optional.ofNullable(filename.listFiles())
+                    .ifPresent(files -> {
+                        Arrays.stream(files).forEach(Utils::sanitize);
+                    });
         }
         filename.delete();
     }
@@ -183,12 +182,8 @@ class Utils {
      */
     static <T extends Serializable> T readObject(File file,
                                                  Class<T> expectedClass) {
-        try {
-            ObjectInputStream in =
-                    new ObjectInputStream(new FileInputStream(file));
-            T result = expectedClass.cast(in.readObject());
-            in.close();
-            return result;
+        try (var in = new ObjectInputStream(new FileInputStream(file))) {
+            return expectedClass.cast(in.readObject());
         } catch (IOException | ClassCastException
                  | ClassNotFoundException excp) {
             throw new IllegalArgumentException(excp.getMessage());

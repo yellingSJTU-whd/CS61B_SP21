@@ -1,7 +1,5 @@
 package gitlet;
 
-import java.util.Objects;
-
 import static gitlet.Repository.GITLET_DIR;
 
 /**
@@ -41,7 +39,7 @@ public class GitletService {
 
     public void add(String path) {
         try {
-            if (repository.makeBlob(path)) {
+            if (repository.stageFile(path)) {
                 repository.saveIndex();
             }
         } catch (GitletException e) {
@@ -52,9 +50,8 @@ public class GitletService {
 
     public void commit(String message) {
         try {
-            if (repository.makeCommit(message)) {
-                repository.saveIndex();
-            }
+            repository.makeCommit(message);
+            repository.saveIndex();
         } catch (GitletException e) {
             System.out.println(e.getMessage());
             System.exit(0);
@@ -149,11 +146,25 @@ public class GitletService {
         }
     }
 
-    public boolean reset() {
-        return false;
+    public void reset(String sha1) {
+        try {
+            if (repository.reset(sha1)) {
+                repository.saveIndex();
+            }
+        } catch (GitletException e) {
+            System.out.println(e.getMessage());
+            System.exit(0);
+        }
     }
 
-    public boolean merge() {
-        return false;
+    public void merge(String branch) {
+        try {
+            if (repository.merge(branch)) {
+                repository.saveIndex();
+            }
+        } catch (GitletException e) {
+            System.out.println(e.getMessage());
+            System.exit(0);
+        }
     }
 }

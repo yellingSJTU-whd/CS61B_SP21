@@ -1,22 +1,13 @@
 package gitlet;
 
-// TODO: any imports you need here
-
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static gitlet.Utils.format;
-import static gitlet.Utils.join;
-
 /**
  * Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
- *
  * @author eYyoz
  */
 public class Commit implements Dumpable {
@@ -25,7 +16,7 @@ public class Commit implements Dumpable {
      * Key:   file name
      * Value: SHA-1 HASH of the blob
      */
-    private final HashMap<String, String> blobs;
+    private final Map<String, String> blobs;
 
     /**
      * Sha1 hash for this commit, used as UID.
@@ -48,7 +39,7 @@ public class Commit implements Dumpable {
      */
     private final String date;
 
-    Commit(HashMap<String, String> blobs, List<String> parents, String message, String date) {
+    Commit(Map<String, String> blobs, List<String> parents, String message, String date) {
         this.blobs = blobs;
         this.parents = parents;
         this.message = message;
@@ -100,8 +91,6 @@ public class Commit implements Dumpable {
         System.out.println(builder);
     }
 
-    /* TODO: fill in the rest of this class. */
-
     public String getSha1() {
         return sha1;
     }
@@ -118,7 +107,7 @@ public class Commit implements Dumpable {
         return message;
     }
 
-    public HashMap<String, String> getBlobs() {
+    public Map<String, String> getBlobs() {
         if (blobs == null) {
             return new HashMap<>(0);
         }

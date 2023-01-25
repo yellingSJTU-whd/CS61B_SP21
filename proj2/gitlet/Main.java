@@ -72,8 +72,12 @@ public class Main {
             }
             case "reset" -> {
                 checkLength(len, 2);
+                GitletService.getInstance().reset(args[1]);
             }
-            // TODO: FILL THE REST IN
+            case "merge" -> {
+                checkLength(len, 2);
+                GitletService.getInstance().merge(args[1]);
+            }
             default -> {
                 exitWithMsg("No command with that name exists.");
             }
