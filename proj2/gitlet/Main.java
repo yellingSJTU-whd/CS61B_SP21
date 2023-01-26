@@ -55,7 +55,7 @@ public class Main {
                 GitletService.find(args[1]);
             }
             case "status" -> {
-                checkLength(len, 2);
+                checkLength(len, 1);
                 GitletService.getInstance().status();
             }
             case "checkout" -> {

@@ -235,9 +235,17 @@ class Utils {
      * Apply given action to all plain files under specified directory.
      * Throw Exception if an I/O error occurs.
      */
-    static void applyToPlainFilesIn(Path dir, Consumer<? super Path> action) {
-        try (var plainFiles = Files.newDirectoryStream(dir, path -> path.toFile().isFile())) {
+    static void applyToPlainFilesIn(Path root, Consumer<? super Path> action) {
+        try (var plainFiles = Files.newDirectoryStream(root, path -> path.toFile().isFile())) {
             plainFiles.forEach(action);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static void applyToDirIn(Path root, Consumer<? super Path> action) {
+        try (var directories = Files.newDirectoryStream(root, path -> path.toFile().isDirectory())) {
+            directories.forEach(action);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

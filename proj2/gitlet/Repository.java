@@ -162,13 +162,13 @@ public class Repository {
 
         @Override
         public String toString() {
-            return "Entry{" +
-                    "mtime=" + mtime +
-                    ", path='" + path + '\'' +
-                    ", wdir='" + wdir + '\'' +
-                    ", stage='" + stage + '\'' +
-                    ", repo='" + repo + '\'' +
-                    '}';
+            return "Entry{"
+                    + "mtime=" + mtime
+                    + ", path='" + path + '\''
+                    + ", wdir='" + wdir + '\''
+                    + ", stage='" + stage + '\''
+                    + ", repo='" + repo + '\''
+                    + '}';
         }
     }
 
@@ -274,11 +274,14 @@ public class Repository {
         var builder = new StringBuilder();
         var dir = COMMITS.toPath();
 
-        applyToPlainFilesIn(dir, commit -> {
-            var sha1 = dir.relativize(commit).toString();
-            appendCommit(fetchCommit(sha1), builder);
+        applyToDirIn(dir, dirPath -> {
+            var prefix = dir.relativize(dirPath).toString();
+            applyToPlainFilesIn(dirPath, commit -> {
+                var remainder = dirPath.relativize(commit).toString();
+                appendCommit(fetchCommit(prefix + remainder), builder);
+            });
         });
-        System.out.println(builder);
+        System.out.print(builder);
     }
 
     static void printCommitsByMessage(String message) {
@@ -329,8 +332,10 @@ public class Repository {
                     //check for difference between working tree and index file,
                     //including unstaged modification or removal.
                     if (!file.exists()) {
-                        modifiedNotStaged.add(path + deletedPostfix);
-                        entry.wdir = REMOVAL;
+                        if (!Objects.equals(entry.stage, REMOVAL)) {
+                            modifiedNotStaged.add(path + deletedPostfix);
+                            entry.wdir = REMOVAL;
+                        }
                     } else {
                         var lastModified = file.lastModified();
                         if (!Objects.equals(entry.mtime, lastModified)) {
@@ -599,17 +604,19 @@ public class Repository {
         }
 
         var blobs = new HashMap<String, String>();
-        index.values().forEach(entry -> {
+        var iter = index.values().iterator();
+        while (iter.hasNext()) {
+            var entry = iter.next();
             var stage = entry.stage;
             if (!Objects.equals(entry.repo, stage)) {
                 blobs.put(entry.path, stage);
                 if (Objects.equals(stage, REMOVAL)) {
-                    index.remove(entry.path);
+                    iter.remove();
                 } else {
                     entry.repo = stage;
                 }
             }
-        });
+        }
         if (blobs.isEmpty()) {
             return new HashMap<>(0);
         }
@@ -764,7 +771,8 @@ public class Repository {
         var filename = blob.getFilename();
         var sha1 = blob.getSha1();
         var mtime = join(CWD, filename).lastModified();
-        var entry = new Entry(mtime, filename, sha1, sha1, null);
+        var oldEntry = index.get(filename);
+        var entry = new Entry(mtime, filename, sha1, sha1, oldEntry == null ? null : oldEntry.repo);
         var modified = !Objects.equals(entry, index.put(filename, entry));
         if (modified) {
             entry.mtime = mtime;
@@ -858,7 +866,7 @@ public class Repository {
                 + delimiter + " Modifications Not Staged For Commit " + delimiter + ls
                 + "%s" + ls
                 + delimiter + " Untracked Files " + delimiter + ls
-                + "%s";
+                + "%s" + ls;
     }
 
     /**
