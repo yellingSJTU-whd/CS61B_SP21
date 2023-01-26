@@ -356,20 +356,21 @@ public class Repository {
     }
 
     boolean checkoutFile(String commitSha1, String filename) {
+        System.out.println(index);
         checkInitialization();
         checkCommit(commitSha1);
         var blobs = fetchCommit(commitSha1).getBlobs();
+        System.out.println(blobs);
         if (!blobs.containsKey(filename)) {
             throw error("File does not exist in that commit.");
         }
 
         //check difference between working tree and repo
         var blobSha1 = blobs.get(filename);
-        var file = join(CWD,filename);
+        var file = join(CWD, filename);
         var entry = index.get(filename);
         if (file.exists()
-                && (Objects.equals(file.lastModified(), entry.mtime)
-                || Objects.equals(sha1(readContents(file)), blobSha1))) {
+                && Objects.equals(sha1(readContents(file)), blobSha1)) {
             return false;
         }
 
@@ -787,6 +788,7 @@ public class Repository {
             return;
         }
         var parents = commit.getParents();
+        builder.append(System.lineSeparator());
         if (parents == null || parents.size() < 2) {
             builder.append(String.format(fetchTemplate(),
                     commit.getSha1(), commit.getDate(), commit.getMessage()));
