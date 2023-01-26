@@ -1,6 +1,8 @@
 package gitlet;
 
 import java.io.File;
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -109,7 +111,10 @@ public class Repository {
     /**
      * An entry represents a file, tracking its status by keeping sha1 under three trees.
      */
-    private static class Entry {
+    private static class Entry implements Serializable {
+
+        @Serial
+        private static final long serialVersionUID = 1234567L;
         long mtime;
 
         String path;
@@ -154,24 +159,21 @@ public class Repository {
             result = 31 * result + (repo != null ? repo.hashCode() : 0);
             return result;
         }
+
+        @Override
+        public String toString() {
+            return "Entry{" +
+                    "mtime=" + mtime +
+                    ", path='" + path + '\'' +
+                    ", wdir='" + wdir + '\'' +
+                    ", stage='" + stage + '\'' +
+                    ", repo='" + repo + '\'' +
+                    '}';
+        }
     }
 
     /**
-     * Build gitlet repository if it doesn't exit.          <br>
-     * The gitlet repository has the following structure:   <br>
-     *                                                      <br>
-     * CWD                                                  <br>
-     * ├─── working tree                                    <br>
-     * │    └── subtrees                                    <br>
-     * │                                                    <br>
-     * └─── .gitlet                                         <br>
-     *      ├── objects                                     <br>
-     *      │   ├── blobs                                   <br>
-     *      │   └── commits                                 <br>
-     *      ├── refs                                        <br>
-     *      │   └── master                                  <br>
-     *      ├── HEAD                                        <br>
-     *      └── index                                       <br>
+     * Build gitlet repository if it doesn't exit.
      */
     static boolean buildGitletRepository() {
         if (GITLET_DIR.exists()) {
@@ -363,19 +365,19 @@ public class Repository {
 
         //check difference between working tree and repo
         var blobSha1 = blobs.get(filename);
+        var file = join(CWD,filename);
         var entry = index.get(filename);
-        if (Objects.equals(entry.wdir, blobSha1)) {
+        if (file.exists()
+                && (Objects.equals(file.lastModified(), entry.mtime)
+                || Objects.equals(sha1(readContents(file)), blobSha1))) {
             return false;
         }
 
         //overwrite the file in working tree
-        var blob = fetchBlob(blobSha1);
-        var content = blob.getContent();
-        var file = join(CWD, filename);
-        writeContents(file, content);
+        writeContents(file, fetchBlob(blobSha1).getContent());
 
         //update index
-        entry.wdir = sha1(content);
+        entry.wdir = blobSha1;
         entry.mtime = file.lastModified();
         return true;
     }
@@ -763,7 +765,7 @@ public class Repository {
         var filename = blob.getFilename();
         var sha1 = blob.getSha1();
         var mtime = join(CWD, filename).lastModified();
-        var entry = new Entry(mtime, filename, sha1, sha1, sha1);
+        var entry = new Entry(mtime, filename, sha1, sha1, null);
         var modified = !Objects.equals(entry, index.put(filename, entry));
         if (modified) {
             entry.mtime = mtime;
