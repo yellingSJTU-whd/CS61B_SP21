@@ -356,9 +356,11 @@ public class Repository {
     }
 
     boolean checkoutFile(String commitSha1, String filename) {
+        System.out.println(index);
         checkInitialization();
         checkCommit(commitSha1);
         var blobs = fetchCommit(commitSha1).getBlobs();
+        System.out.println(blobs);
         if (!blobs.containsKey(filename)) {
             throw error("File does not exist in that commit.");
         }
