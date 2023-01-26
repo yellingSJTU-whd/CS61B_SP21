@@ -266,7 +266,7 @@ public class Repository {
             appendCommit(curr, builder);
             curr = isInitial ? null : fetchCommit(parents.get(0));
         }
-        System.out.println(builder);
+        System.out.print(builder);
     }
 
     static void printGlobalLog() {
@@ -786,7 +786,6 @@ public class Repository {
             return;
         }
         var parents = commit.getParents();
-        builder.append(System.lineSeparator());
         if (parents == null || parents.size() < 2) {
             builder.append(String.format(fetchTemplate(),
                     commit.getSha1(), commit.getDate(), commit.getMessage()));
@@ -796,6 +795,7 @@ public class Repository {
                     parents.get(1).substring(0, 7),
                     commit.getDate(), commit.getMessage()));
         }
+        builder.append(System.lineSeparator());
     }
 
     /**
