@@ -85,7 +85,7 @@ public class Main {
     }
 
     private static void exitWithMsg(String msg) {
-        Utils.message(msg);
+        System.out.println(msg);
         System.exit(0);
     }
 

@@ -99,11 +99,6 @@ public class Repository {
     public static final ZoneId SHANGHAI = ZoneId.of("Asia/Shanghai");
 
     /**
-     * Localized epoch for shanghai.
-     */
-    public static final ZonedDateTime EPOCH = Instant.EPOCH.atZone(SHANGHAI);
-
-    /**
      * SHA1 HASH mark for REMOVAL
      */
     public static final String REMOVAL = "0".repeat(UID_LENGTH);
@@ -288,12 +283,17 @@ public class Repository {
         checkInitialization();
         var builder = new StringBuilder();
         var dir = COMMITS.toPath();
+        var ls = System.lineSeparator();
 
-        applyToPlainFilesIn(dir, commit -> {
-            var sha1 = dir.relativize(commit).toString();
-            if (Objects.equals(fetchCommit(sha1).getMessage(), message)) {
-                builder.append(sha1).append(System.lineSeparator());
-            }
+        applyToDirIn(dir, dirPath -> {
+            var prefix = dir.relativize(dirPath).toString();
+            applyToPlainFilesIn(dirPath, commit -> {
+                var remainder = dirPath.relativize(commit).toString();
+                var sha1 = prefix + remainder;
+                if (Objects.equals(fetchCommit(sha1).getMessage(), message)) {
+                    builder.append(sha1).append(ls);
+                }
+            });
         });
 
         if (builder.length() == 0) {
@@ -507,7 +507,6 @@ public class Repository {
                 var wdirSha1 = sha1(readContentsAsString(join(CWD, filename)));
                 if (Objects.equals(repoSha1, wdirSha1)) {
                     identical.add(filename);
-                } else {
                     iter.remove();
                 }
             }
@@ -628,7 +627,7 @@ public class Repository {
         var blobs = commit.getBlobs();
 
         //create or overwrite files and update index
-        var modified = new AtomicReference<Boolean>(false);
+        var modified = new AtomicReference<>(false);
         blobs.forEach((filename, sha1) -> {
             if (!identical.contains(filename)) {
                 var file = join(CWD, filename);
@@ -725,8 +724,8 @@ public class Repository {
         var mergeBlobs = merge.getBlobs();
         var headSet = headBlobs.keySet();
         var mergeSet = mergeBlobs.keySet();
-        var mergeOnly = new HashSet<String>(mergeSet);
-        var diff = new HashSet<String>(headSet);
+        var mergeOnly = new HashSet<>(mergeSet);
+        var diff = new HashSet<>(headSet);
         mergeOnly.removeAll(headSet);
         diff.retainAll(mergeSet);
         diff.removeAll(identical);

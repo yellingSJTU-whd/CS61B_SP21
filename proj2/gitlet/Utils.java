@@ -23,11 +23,8 @@ import java.util.Arrays;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-
-import static gitlet.Repository.SHANGHAI;
 
 
 /**
@@ -47,12 +44,14 @@ class Utils {
     /**
      * The formatter to format canonical date string.
      */
-    static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE LLL d kk:mm:ss yyyy Z").localizedBy(Locale.ENGLISH);
+    static final DateTimeFormatter FORMATTER =
+            DateTimeFormatter.ofPattern("EEE LLL d kk:mm:ss yyyy Z").localizedBy(Locale.ENGLISH);
 
     /* SHA-1 HASH VALUES. */
 
     /**
-     * Returns the SHA-1 hash of the concatenation of VALS, which may be any mixture of byte arrays and Strings.
+     * Returns the SHA-1 hash of the concatenation of VALS,
+     * which may be any mixture of byte arrays and Strings.
      */
     static String sha1(Object... vals) {
         try {
@@ -86,9 +85,10 @@ class Utils {
     /* FILE DELETION */
 
     /**
-     * Deletes FILE if it exists and is not a directory.  Returns true if FILE was deleted, and false otherwise.
-     * Refuses to delete FILE and throws IllegalArgumentException unless the directory designated by FILE also contains
-     * a directory named .gitlet.
+     * Deletes FILE if it exists and is not a directory.
+     * Returns true if FILE was deleted, and false otherwise.
+     * Refuses to delete FILE and throws IllegalArgumentException
+     * unless the directory designated by FILE also contains a directory named .gitlet.
      */
     static boolean restrictedDelete(File file) {
         if (!(new File(file.getParentFile(), ".gitlet")).isDirectory()) {
@@ -102,9 +102,10 @@ class Utils {
     }
 
     /**
-     * Deletes the file named FILE if it exists and is not a directory. Returns true if FILE was deleted, and false
-     * otherwise.  Refuses to delete FILE and throws IllegalArgumentException unless the directory designated by FILE
-     * also contains a directory named .gitlet.
+     * Deletes the file named FILE if it exists and is not a directory.
+     * Returns true if FILE was deleted, and false otherwise.
+     * Refuses to delete FILE and throws IllegalArgumentException
+     * unless the directory designated by FILE also contains a directory named .gitlet.
      */
     static boolean restrictedDelete(String file) {
         return restrictedDelete(new File(file));
@@ -129,8 +130,9 @@ class Utils {
     /* READING AND WRITING FILE CONTENTS */
 
     /**
-     * Return the entire contents of FILE as a byte array.  FILE must be a normal file.  Throws IllegalArgumentException
-     * in case of problems.
+     * Return the entire contents of FILE as a byte array.
+     * FILE must be a normal file.
+     * Throws IllegalArgumentException in case of problems.
      */
     static byte[] readContents(File file) {
         if (!file.isFile()) {
@@ -144,16 +146,19 @@ class Utils {
     }
 
     /**
-     * Return the entire contents of FILE as a String.  FILE must be a normal file.  Throws IllegalArgumentException in
-     * case of problems.
+     * Return the entire contents of FILE as a String.
+     * FILE must be a normal file.
+     * Throws IllegalArgumentException in case of problems.
      */
     static String readContentsAsString(File file) {
         return new String(readContents(file), StandardCharsets.UTF_8);
     }
 
     /**
-     * Write the result of concatenating the bytes in CONTENTS to FILE, creating or overwriting it as needed.  Each
-     * object in CONTENTS may be either a String or a byte array.  Throws IllegalArgumentException in case of problems.
+     * Write the result of concatenating the bytes in CONTENTS to FILE,
+     * creating or overwriting it as needed.
+     * Each object in CONTENTS may be either a String or a byte array.
+     * Throws IllegalArgumentException in case of problems.
      */
     static void writeContents(File file, Object... contents) {
         try {
@@ -177,8 +182,8 @@ class Utils {
     }
 
     /**
-     * Return an object of type T read from FILE, casting it to EXPECTEDCLASS. Throws IllegalArgumentException in case
-     * of problems.
+     * Return an object of type T read from FILE, casting it to EXPECTEDCLASS.
+     * Throws IllegalArgumentException in case of problems.
      */
     static <T extends Serializable> T readObject(File file,
                                                  Class<T> expectedClass) {
@@ -203,10 +208,11 @@ class Utils {
      * Filter out all but plain files.
      */
     private static final FilenameFilter PLAIN_FILES =
-            (dir, name) -> new File(dir, name).isFile();
+        (dir, name) -> new File(dir, name).isFile();
 
     /**
-     * Returns a list of the names of all plain files in the directory DIR, in lexicographic order as Java Strings.
+     * Returns a list of the names of all plain files in the directory DIR,
+     * in lexicographic order as Java Strings.
      * Returns null if DIR does not denote a directory.
      */
     static List<String> plainFilenamesIn(File dir) {
@@ -224,7 +230,8 @@ class Utils {
     }
 
     /**
-     * Returns a list of the names of all plain files in the directory DIR, in lexicographic order as Java Strings.
+     * Returns a list of the names of all plain files in the directory DIR,
+     * in lexicographic order as Java Strings.
      * Returns null if DIR does not denote a directory.
      */
     static List<String> plainFilenamesIn(String dir) {
@@ -244,7 +251,8 @@ class Utils {
     }
 
     static void applyToDirIn(Path root, Consumer<? super Path> action) {
-        try (var directories = Files.newDirectoryStream(root, path -> path.toFile().isDirectory())) {
+        try (var directories =
+                     Files.newDirectoryStream(root, path -> path.toFile().isDirectory())) {
             directories.forEach(action);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -293,14 +301,16 @@ class Utils {
     /* MESSAGES AND ERROR REPORTING */
 
     /**
-     * Return a GitletException whose message is composed from MSG and ARGS as for the String.format method.
+     * Return a GitletException whose message is composed from
+     * MSG and ARGS as for the String.format method.
      */
     static GitletException error(String msg, Object... args) {
         return new GitletException(String.format(msg, args));
     }
 
     /**
-     * Print a message composed from MSG and ARGS as for the String.format method, followed by a newline.
+     * Print a message composed from MSG and ARGS
+     * as for the String.format method, followed by a newline.
      */
     static void message(String msg, Object... args) {
         System.out.printf(msg, args);
@@ -314,14 +324,14 @@ class Utils {
      * Format a ZonedDateTime to a String.
      */
     static String format(ZonedDateTime date) {
-        return date.format(formatter);
+        return date.format(FORMATTER);
     }
 
     /**
      * Parse a String to a ZonedDateTime.
      */
     static ZonedDateTime parse(String date) {
-        return ZonedDateTime.parse(date, formatter);
+        return ZonedDateTime.parse(date, FORMATTER);
     }
 
     /**
@@ -335,6 +345,6 @@ class Utils {
      * Format epoch millisecond to a String.
      */
     static String format(long epochMilli) {
-        return formatter.format(Instant.ofEpochMilli(epochMilli));
+        return FORMATTER.format(Instant.ofEpochMilli(epochMilli));
     }
 }

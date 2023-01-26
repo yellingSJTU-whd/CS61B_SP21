@@ -1,5 +1,7 @@
 package gitlet;
 
+import java.util.Objects;
+
 import static gitlet.Repository.GITLET_DIR;
 
 /**
@@ -113,9 +115,11 @@ public class GitletService {
                     modified = repository.checkoutBranch(args[1]);
                 }
                 case 3 -> {
+                    checkOperands(args[1]);
                     modified = repository.checkoutFile(args[2]);
                 }
                 case 4 -> {
+                    checkOperands(args[2]);
                     modified = repository.checkoutFile(args[1], args[3]);
                 }
             }
@@ -165,6 +169,12 @@ public class GitletService {
         } catch (GitletException e) {
             System.out.println(e.getMessage());
             System.exit(0);
+        }
+    }
+
+    private static void checkOperands(String str) {
+        if (!Objects.equals(str, "--")) {
+            throw new GitletException("Incorrect operands");
         }
     }
 }
