@@ -266,7 +266,7 @@ public class Repository {
             appendCommit(curr, builder);
             curr = isInitial ? null : fetchCommit(parents.get(0));
         }
-        System.out.println(builder);
+        System.out.print(builder);
     }
 
     static void printGlobalLog() {
