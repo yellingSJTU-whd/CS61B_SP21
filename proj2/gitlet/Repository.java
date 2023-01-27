@@ -207,14 +207,14 @@ public class Repository {
      */
     void makeCommit(String message) {
         checkInitialization();
-        var map = fetchStagedAndUpdateIndex();
-        if (map.isEmpty()) {
+        var blobs = fetchStagedAndUpdateIndex();
+        if (blobs.isEmpty()) {
             throw error("No changes added to the commit.");
         }
 
         var branch = fetchCurrentBranch();
         var lastCommit = fetchTipOfBranch(branch);
-        var commit = new Commit(map, List.of(lastCommit),
+        var commit = new Commit(blobs, List.of(lastCommit),
                 message, format(ZonedDateTime.now(SHANGHAI)));
 
         storeCommit(commit);
@@ -460,7 +460,7 @@ public class Repository {
             throw error("Current branch fast-forwarded.");
         }
         var identical = checkBeforeCheckout(mergeCommit);
-        var msg = String.format("Merged %s into %s", currBranch, branch);
+        var msg = String.format("Merged %s into %s.", branch, currBranch);
         return trueMerge(headCommit, mergeCommit, identical, msg);
     }
 
@@ -631,10 +631,14 @@ public class Repository {
         blobs.forEach((filename, sha1) -> {
             if (!identical.contains(filename)) {
                 var file = join(CWD, filename);
-                var blob = fetchBlob(sha1);
-                writeContents(file, blob.getContent());
+                if (Objects.equals(REMOVAL, sha1)) {
+                    sanitize(file);
+                } else {
+                    var blob = fetchBlob(sha1);
+                    writeContents(file, blob.getContent());
+                    index.put(filename, new Entry(file.lastModified(), filename, sha1, sha1, sha1));
+                }
                 modified.set(true);
-                index.put(filename, new Entry(file.lastModified(), filename, sha1, sha1, sha1));
             }
         });
 
@@ -731,20 +735,25 @@ public class Repository {
         diff.removeAll(identical);
 
         mergeOnly.forEach(filename -> {
-            var blob = fetchBlob(mergeBlobs.get(filename));
+            var sha1 = mergeBlobs.get(filename);
             var file = join(CWD, filename);
-            var sha1 = blob.getSha1();
-
-            writeContents(file, blob.getContent());
-            index.put(filename,
-                    new Entry(file.lastModified(), filename, sha1, sha1, null));
+            if (Objects.equals(REMOVAL, sha1)) {
+                sanitize(file);
+            } else {
+                var blob = fetchBlob(mergeBlobs.get(filename));
+                writeContents(file, blob.getContent());
+                index.put(filename,
+                        new Entry(file.lastModified(), filename, sha1, sha1, null));
+            }
         });
         diff.forEach(filename -> {
+            var headSha1 = headBlobs.get(filename);
+            var mergeSha1 = mergeBlobs.get(filename);
             var ls = System.lineSeparator();
             var content = "<<<<<<< HEAD" + ls
-                    + fetchBlob(headBlobs.get(filename)).getContent()
+                    + (Objects.equals(REMOVAL, headSha1) ? "" : fetchBlob(headSha1).getContent())
                     + "=======" + ls
-                    + fetchBlob(mergeBlobs.get(filename)).getContent()
+                    + (Objects.equals(REMOVAL, mergeSha1) ? "" : fetchBlob(mergeSha1).getContent())
                     + ">>>>>>>";
             var entry = index.get(filename);
             var file = join(CWD, filename);
