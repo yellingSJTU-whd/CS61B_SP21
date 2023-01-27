@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static gitlet.Utils.*;
@@ -233,16 +234,13 @@ public class Repository {
         }
 
         var entry = index.get(fileName);
-        var stage = entry.stage;
-        var repo = entry.repo;
-        var file = join(CWD, entry.path);
-
-        if (!Objects.equals(stage, repo)) {
-            index.remove(fileName);
+        if (entry.repo == null) {
+            if (entry.stage != null) {
+                index.remove(fileName);
+            }
         } else {
-            //stage for REMOVAL, the file will remove from index at next commit
             entry.stage = REMOVAL;
-            file.delete();
+            join(CWD, entry.path).delete();
         }
     }
 
@@ -313,13 +311,10 @@ public class Repository {
         var removed = new ArrayList<String>();
         var modifiedNotStaged = new ArrayList<String>();
         var untracked = plainFilenamesIn(CWD);
-        var deletedPostfix = " (deleted)";
-        var modifiedPostfix = " (modified)";
-
         index.values()
             .forEach(entry -> {
-                    var path = entry.path;
-                    var file = join(CWD, path);
+                var path = entry.path;
+                var file = join(CWD, path);
 
                     if (untracked != null) {
                         untracked.remove(path);
@@ -333,13 +328,13 @@ public class Repository {
                     //including unstaged modification or removal.
                     if (!file.exists()) {
                         if (!Objects.equals(entry.stage, REMOVAL)) {
-                            modifiedNotStaged.add(path + deletedPostfix);
+                            modifiedNotStaged.add(path + " (deleted)");
                             entry.wdir = REMOVAL;
                         }
                     } else {
                         var lastModified = file.lastModified();
                         if (!Objects.equals(entry.mtime, lastModified)) {
-                            modifiedNotStaged.add(path + modifiedPostfix);
+                            modifiedNotStaged.add(path + " (modified)");
                             entry.mtime = lastModified;
                             entry.wdir = sha1(readContentsAsString(file));
                         }
@@ -593,6 +588,47 @@ public class Repository {
 
     /* Object system utils*/
 
+    private static List<String> fetchAncestors(String commitSha1) {
+        var list = new ArrayList<String>();
+        list.add(commitSha1);
+
+        for (int i = 0; i < list.size(); i++) {
+            var currSha1 = list.get(i);
+            var currCommit = fetchCommit(currSha1);
+            var parents = currCommit.getParents();
+            if (parents != null) {
+                list.addAll(parents);
+            }
+        }
+        return list;
+    }
+
+    private static Commit fetchLastCommonAncestor(List<String> ancestors,
+                                                  List<String> otherAncestors) {
+        var list = new ArrayList<>(ancestors);
+        list.retainAll(otherAncestors);
+        return fetchCommit(list.get(0));
+    }
+
+    private void applyBlob(String blobSha1, String filename) {
+        if (Objects.equals(REMOVAL, blobSha1)) {
+            sanitize(join(CWD, filename));
+            index.remove(filename);
+        } else {
+            applyBlob(fetchBlob(blobSha1));
+        }
+    }
+
+    private void applyBlob(Blob blob) {
+        var filename = blob.getFilename();
+        var sha1 = blob.getSha1();
+        var file = join(CWD, filename);
+        writeContents(file, blob.getContent());
+        var mtime = file.lastModified();
+        var entry = new Entry(mtime, filename, sha1, sha1, sha1);
+        index.put(filename, entry);
+    }
+
     /**
      * Fetch staged blobs, which wait to be committed, from index.
      * Also update if there is any files staged.
@@ -607,8 +643,8 @@ public class Repository {
         while (iter.hasNext()) {
             var entry = iter.next();
             var stage = entry.stage;
+            blobs.put(entry.path, stage);
             if (!Objects.equals(entry.repo, stage)) {
-                blobs.put(entry.path, stage);
                 if (Objects.equals(stage, REMOVAL)) {
                     iter.remove();
                 } else {
@@ -724,52 +760,65 @@ public class Repository {
     }
 
     private boolean trueMerge(Commit head, Commit merge, Set<String> identical, String msg) {
-        var headBlobs = head.getBlobs();
-        var mergeBlobs = merge.getBlobs();
-        var headSet = headBlobs.keySet();
-        var mergeSet = mergeBlobs.keySet();
+        var headSet = head.getBlobs().keySet();
+        var mergeSet = merge.getBlobs().keySet();
         var mergeOnly = new HashSet<>(mergeSet);
         var diff = new HashSet<>(headSet);
+        var splitPoint = fetchLastCommonAncestor(fetchAncestors(head.getSha1()),
+                fetchAncestors(merge.getSha1()));
+        var conflicted = new AtomicBoolean(false);
         mergeOnly.removeAll(headSet);
         diff.retainAll(mergeSet);
         diff.removeAll(identical);
 
         mergeOnly.forEach(filename -> {
-            var sha1 = mergeBlobs.get(filename);
+            var sha1 = merge.getBlobs().get(filename);
             var file = join(CWD, filename);
             if (Objects.equals(REMOVAL, sha1)) {
                 sanitize(file);
             } else {
-                var blob = fetchBlob(mergeBlobs.get(filename));
+                var blob = fetchBlob(merge.getBlobs().get(filename));
                 writeContents(file, blob.getContent());
                 index.put(filename,
                         new Entry(file.lastModified(), filename, sha1, sha1, null));
             }
         });
         diff.forEach(filename -> {
-            var headSha1 = headBlobs.get(filename);
-            var mergeSha1 = mergeBlobs.get(filename);
-            var ls = System.lineSeparator();
-            var content = "<<<<<<< HEAD" + ls
-                    + (Objects.equals(REMOVAL, headSha1) ? "" : fetchBlob(headSha1).getContent())
-                    + "=======" + ls
-                    + (Objects.equals(REMOVAL, mergeSha1) ? "" : fetchBlob(mergeSha1).getContent())
-                    + ">>>>>>>";
-            var entry = index.get(filename);
-            var file = join(CWD, filename);
+            var refSha1 = splitPoint.getBlobs().get(filename);
+            var headSha1 = head.getBlobs().get(filename);
+            var mergeSha1 = merge.getBlobs().get(filename);
+            var headEqual = Objects.equals(refSha1, headSha1);
+            var mergeEqual = Objects.equals(refSha1, mergeSha1);
+            if (headEqual ^ mergeEqual) {
+                applyBlob(headEqual ? mergeSha1 : headSha1, filename);
+            } else {
+                var headContent = (Objects.equals(REMOVAL, headSha1)
+                        ? "" : fetchBlob(headSha1).getContent());
+                var mergeContent = (Objects.equals(REMOVAL, mergeSha1)
+                        ? "" : fetchBlob(mergeSha1).getContent());
+                conflicted.set(true);
+                var ls = System.lineSeparator();
+                var content = "<<<<<<< HEAD" + ls
+                        + headContent
+                        + "=======" + ls
+                        + mergeContent
+                        + ">>>>>>>";
+                var file = join(CWD, filename);
 
-            writeContents(file, content);
-            entry.mtime = file.lastModified();
-            var blob = new Blob(filename);
-            storeBlob(blob);
-            updateIndex(blob);
+                writeContents(file, content);
+                var blob = new Blob(filename);
+                var blobSha1 = blob.getSha1();
+                storeBlob(blob);
+                index.put(filename,
+                        new Entry(file.lastModified(), filename, blobSha1, blobSha1, blobSha1));
+            }
         });
 
         makeMergeCommit(msg, merge.getSha1());
-        if (!diff.isEmpty()) {
+        if (conflicted.get()) {
             System.out.println("Encountered a merge conflict.");
         }
-        return mergeOnly.isEmpty() && diff.isEmpty();
+        return !(mergeOnly.isEmpty() && diff.isEmpty());
     }
 
     /**

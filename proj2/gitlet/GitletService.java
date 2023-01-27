@@ -21,14 +21,14 @@ public class GitletService {
     /**
      * @return an instance of GitletService
      */
-    public static GitletService getInstance() {
+    static GitletService getInstance() {
         if (service == null) {
             service = new GitletService();
         }
         return service;
     }
 
-    public static void init() {
+    static void init() {
         try {
             if (!Repository.buildGitletRepository()) {
                 Utils.sanitize(GITLET_DIR);
@@ -39,7 +39,7 @@ public class GitletService {
         }
     }
 
-    public void add(String path) {
+    void add(String path) {
         try {
             if (repository.stageFile(path)) {
                 repository.saveIndex();
@@ -50,7 +50,7 @@ public class GitletService {
         }
     }
 
-    public void commit(String message) {
+    void commit(String message) {
         try {
             repository.makeCommit(message);
             repository.saveIndex();
@@ -60,7 +60,7 @@ public class GitletService {
         }
     }
 
-    public void rm(String fileName) {
+    void rm(String fileName) {
         try {
             repository.removeFromIndex(fileName);
             repository.saveIndex();
@@ -70,7 +70,7 @@ public class GitletService {
         }
     }
 
-    public static void log() {
+    static void log() {
         try {
             Repository.printLog();
         } catch (GitletException e) {
@@ -79,7 +79,7 @@ public class GitletService {
         }
     }
 
-    public static void globalLog() {
+    static void globalLog() {
         try {
             Repository.printGlobalLog();
         } catch (GitletException e) {
@@ -88,7 +88,7 @@ public class GitletService {
         }
     }
 
-    public static void find(String message) {
+    static void find(String message) {
         try {
             Repository.printCommitsByMessage(message);
         } catch (GitletException e) {
@@ -97,7 +97,7 @@ public class GitletService {
         }
     }
 
-    public void status() {
+    void status() {
         try {
             repository.printStatus();
         } catch (GitletException e) {
@@ -106,7 +106,7 @@ public class GitletService {
         }
     }
 
-    public void checkout(String... args) {
+    void checkout(String... args) {
         var len = args.length;
         var modified = false;
         try {
@@ -132,7 +132,7 @@ public class GitletService {
         }
     }
 
-    public static void branch(String branch) {
+    static void branch(String branch) {
         try {
             Repository.createBranch(branch);
         } catch (GitletException e) {
@@ -141,7 +141,7 @@ public class GitletService {
         }
     }
 
-    public static void rmBranch(String branch) {
+    static void rmBranch(String branch) {
         try {
             Repository.removeBranch(branch);
         } catch (GitletException e) {
@@ -150,7 +150,7 @@ public class GitletService {
         }
     }
 
-    public void reset(String sha1) {
+    void reset(String sha1) {
         try {
             if (repository.reset(sha1)) {
                 repository.saveIndex();
@@ -161,7 +161,7 @@ public class GitletService {
         }
     }
 
-    public void merge(String branch) {
+    void merge(String branch) {
         try {
             if (repository.merge(branch)) {
                 repository.saveIndex();
