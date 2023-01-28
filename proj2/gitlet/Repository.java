@@ -820,7 +820,7 @@ public class Repository {
                 var mergeContent = (Objects.equals(REMOVAL, mergeSha1)
                         ? "" : fetchBlob(mergeSha1).getContent());
 //                var ls = System.lineSeparator();
-                var ls = "\n";
+                var ls = "\r";
                 var content = "<<<<<<< HEAD" + ls
                         + headContent
                         + "=======" + ls
