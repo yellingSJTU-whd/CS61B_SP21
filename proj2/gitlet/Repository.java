@@ -814,19 +814,19 @@ public class Repository {
             } else if (headEqual ^ mergeEqual) {
                 applyBlob(headEqual ? mergeSha1 : headSha1, filename);
             } else {
+                conflicted.set(true);
                 var headContent = (Objects.equals(REMOVAL, headSha1)
                         ? "" : fetchBlob(headSha1).getContent());
                 var mergeContent = (Objects.equals(REMOVAL, mergeSha1)
                         ? "" : fetchBlob(mergeSha1).getContent());
-                conflicted.set(true);
-                var ls = System.lineSeparator();
+//                var ls = System.lineSeparator();
+                var ls = "\n";
                 var content = "<<<<<<< HEAD" + ls
                         + headContent
                         + "=======" + ls
                         + mergeContent
                         + ">>>>>>>";
                 var file = join(CWD, filename);
-
                 writeContents(file, content);
                 var blob = new Blob(filename);
                 var blobSha1 = blob.getSha1();
@@ -840,7 +840,6 @@ public class Repository {
         if (conflicted.get()) {
             System.out.println("Encountered a merge conflict.");
         }
-        var ls = System.lineSeparator();
         return !(mergeOnly.isEmpty() && diff.isEmpty());
     }
 
