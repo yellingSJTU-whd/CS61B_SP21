@@ -401,6 +401,7 @@ public class Repository {
 
     boolean reset(String sha1) {
         checkInitialization();
+        checkCommit(sha1);
         var indexModified = checkoutCommit(sha1);
         moveBranchTo(fetchCurrentBranch(), sha1);
         return indexModified;
@@ -483,8 +484,24 @@ public class Repository {
      * Check whether the given SHA1 HASH match a saved commit object.
      */
     private void checkCommit(String sha1) {
-        if (!join(COMMITS, sha1.substring(0, 2), sha1.substring(2)).exists()) {
-            throw error("No commit with that id exists.");
+        var errMsg = "No commit with that id exists.";
+        var dir = join(COMMITS, sha1.substring(0, 2));
+        if (Objects.equals(UID_LENGTH, sha1.length())) {
+            if (!join(dir, sha1.substring(2)).exists()) {
+                throw error(errMsg);
+            }
+        } else {
+            var commits = plainFilenamesIn(dir);
+            if (commits == null) {
+                throw error(errMsg);
+            }
+            var remainder = sha1.substring(2);
+            for (String filename : commits) {
+                if (filename.startsWith(remainder)) {
+                    return;
+                }
+            }
+            throw error(errMsg);
         }
     }
 
@@ -670,6 +687,7 @@ public class Repository {
                 var file = join(CWD, filename);
                 if (Objects.equals(REMOVAL, sha1)) {
                     sanitize(file);
+                    index.remove(filename);
                 } else {
                     var blob = fetchBlob(sha1);
                     writeContents(file, blob.getContent());
@@ -696,13 +714,13 @@ public class Repository {
 
     private static Commit fetchCommit(String sha1) {
         var dir = join(COMMITS, sha1.substring(0, 2));
-        var files = plainFilenamesIn(dir);
-        if (files == null) {
+        var commits = plainFilenamesIn(dir);
+        if (commits == null) {
             throw new RuntimeException();
         }
 
         var remainder = sha1.substring(2);
-        for (String filename : files) {
+        for (String filename : commits) {
             if (filename.startsWith(remainder)) {
                 return readObject(join(dir, filename), Commit.class);
             }
@@ -790,7 +808,10 @@ public class Repository {
             var mergeSha1 = merge.getBlobs().get(filename);
             var headEqual = Objects.equals(refSha1, headSha1);
             var mergeEqual = Objects.equals(refSha1, mergeSha1);
-            if (headEqual ^ mergeEqual) {
+
+            if (Objects.equals(headSha1, mergeSha1)) {
+                applyBlob(headSha1, filename);
+            } else if (headEqual ^ mergeEqual) {
                 applyBlob(headEqual ? mergeSha1 : headSha1, filename);
             } else {
                 var headContent = (Objects.equals(REMOVAL, headSha1)
@@ -819,6 +840,7 @@ public class Repository {
         if (conflicted.get()) {
             System.out.println("Encountered a merge conflict.");
         }
+        var ls = System.lineSeparator();
         return !(mergeOnly.isEmpty() && diff.isEmpty());
     }
 
