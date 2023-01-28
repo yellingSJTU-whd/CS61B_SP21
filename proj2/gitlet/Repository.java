@@ -302,8 +302,9 @@ public class Repository {
 
     void printStatus() {
         checkInitialization();
+        var branches = fetchBranchesStatus();
         if (index.isEmpty()) {
-            System.out.printf(buildStatusTemplate(), fetchBranchesStatus(), "", "", "", "");
+            System.out.printf(buildStatusTemplate(), branches, "", "", "", "");
             return;
         }
 
@@ -343,7 +344,7 @@ public class Repository {
             );
 
         System.out.printf(buildStatusTemplate(),
-                fetchBranchesStatus(),
+                branches,
                 reduce(staged),
                 reduce(removed),
                 reduce(modifiedNotStaged),
@@ -557,14 +558,14 @@ public class Repository {
 
     private static String fetchBranchesStatus() {
         var dir = REFS.toPath();
-        var builder = new StringBuilder();
         var curr = fetchCurrentBranch();
+        var list = new ArrayList<String>();
 
         applyToPlainFilesIn(dir, ref -> {
             var branch = dir.relativize(ref).toString();
-            builder.append(branch).append(System.lineSeparator());
+            list.add(branch);
         });
-        return builder.toString().replaceFirst(curr, "*" + curr);
+        return reduce(list).replaceFirst(curr, "*" + curr);
     }
 
     /**
