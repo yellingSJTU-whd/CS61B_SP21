@@ -339,7 +339,7 @@ public class Engine {
     /**
      * Method used for playing a fresh game. The game should start from the main menu.
      */
-    public void playWithKeyboard() {
+    public void interactWithKeyboard() {
 
         //1. show the starting UI
         showMainMenu();

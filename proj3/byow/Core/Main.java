@@ -17,7 +17,7 @@ public class Main {
             System.out.println(TETile.toString(worldState));
         } else {
             Engine engine = new Engine();
-            engine.playWithKeyboard();
+            engine.interactWithKeyboard();
         }
     }
 }
