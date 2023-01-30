@@ -1,5 +1,6 @@
 package byow.TileEngine;
 
+import byow.Core.Position;
 import edu.princeton.cs.introcs.StdDraw;
 
 import java.awt.Color;
@@ -94,6 +95,28 @@ public class TERenderer {
                             + " is null.");
                 }
                 world[x][y].draw(x + xOffset, y + yOffset);
+            }
+        }
+        StdDraw.show();
+    }
+
+    public void renderFrameWithShadow(TETile[][] theWorld, Position centre, int radius) {
+        int numXTiles = theWorld.length;
+        int numYTiles = theWorld[0].length;
+        StdDraw.clear(new Color(0, 0, 0));
+        for (int x = centre.getX() - radius; x <= centre.getX() + radius; x++) {
+            if (x < 0 || x >= numXTiles) {
+                continue;
+            }
+            int delta = radius - Math.abs(centre.getX() - x);
+            for (int y = centre.getY() - delta; y <= centre.getY() + delta; y++) {
+                if (y < 0 || y >= numYTiles) {
+                    continue;
+                }
+                if (theWorld[x][y] == null) {
+                    throw new IllegalArgumentException("Tile at (" + x + "," + y + ") is null.");
+                }
+                theWorld[x][y].draw(x + xOffset, y + yOffset);
             }
         }
         StdDraw.show();
