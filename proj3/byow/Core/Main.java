@@ -13,7 +13,7 @@ public class Main {
             System.exit(0);
         } else if (args.length == 1) {
             Engine engine = new Engine();
-            TETile[][] worldState = engine.playWithInputString(args[0]);
+            TETile[][] worldState = engine.interactWithInputString(args[0]);
             System.out.println(TETile.toString(worldState));
         } else {
             Engine engine = new Engine();

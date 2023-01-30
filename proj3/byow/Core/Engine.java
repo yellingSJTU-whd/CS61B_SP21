@@ -55,7 +55,7 @@ public class Engine {
         if (operations == null || operations.length() == 0) {
             System.exit(0);
         }
-        theWorld = playWithInputString(operations);
+        theWorld = interactWithInputString(operations);
         StdDraw.setFont(new Font("Monaco", Font.BOLD, 14));
         ter.renderFrameWithShadow(theWorld, player.getPosition(), 15);
     }
@@ -365,13 +365,13 @@ public class Engine {
      * playWithKeyboard. If the string ends in ":q", the same world should be returned as if the
      * string did not end with q. For example "n123sss" and "n123sss:q" should return the same
      * world. However, the behavior is slightly different. After playing with "n123sss:q", the game
-     * should save, and thus if we then called playWithInputString with the string "l", we'd expect
+     * should save, and thus if we then called interactWithInputString with the string "l", we'd expect
      * to get the exact same world back again, since this corresponds to loading the saved game.
      *
      * @param input the input string to feed to your program
      * @return the 2D TETile[][] representing the state of the world
      */
-    public TETile[][] playWithInputString(String input) {
+    public TETile[][] interactWithInputString(String input) {
         String upper = input.toUpperCase();
         int delimitation = upper.indexOf("S") + 1;
         int quitIndex = upper.indexOf(":Q");
@@ -391,7 +391,7 @@ public class Engine {
             if (operations == null || operations.length() == 0) {
                 System.exit(0);
             }
-            theWorld = playWithInputString(operations);
+            theWorld = interactWithInputString(operations);
             if (quitIndex >= 0) {
                 processMovementStr(upper.substring(1, quitIndex));
                 saveOperations();
