@@ -235,8 +235,7 @@ public class Engine {
     }
 
     private void saveOperations() {
-        var path = Paths.get("byow", "Core", "save.txt");
-        try (var stream = new BufferedOutputStream(Files.newOutputStream(path))) {
+        try (var stream = new BufferedOutputStream(Files.newOutputStream(save))) {
             stream.write(String.valueOf(operations).getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -355,7 +354,7 @@ public class Engine {
         var quitIndex = upper.indexOf(":Q");
 
         if (upper.startsWith("N")) {
-            long seed = parseSeed(input);
+            var seed = parseSeed(input);
             operations = new StringBuilder("N" + seed + "S");
             theWorld = generateWorld(seed);
             if (quitIndex >= 0) {
@@ -372,11 +371,8 @@ public class Engine {
             theWorld = interactWithInputString(String.valueOf(operations));
             if (quitIndex >= 0) {
                 processMovementStr(upper.substring(1, quitIndex));
-                System.exit(0);
-            } else {
-                if (upper.length() > 1) {
-                    processMovementStr(upper.substring(1));
-                }
+            } else if (upper.length() > 1) {
+                processMovementStr(upper.substring(1));
             }
             saveOperations();
         } else {
@@ -446,10 +442,9 @@ public class Engine {
         List<Room> rooms = generateRooms();
 
         //3. generate halls from button left of the map
-        Position start = new Position(1, 1);
         theWorld[1][1] = Tileset.FLOOR;
-        boolean[][] visited = new boolean[WIDTH][HEIGHT];
-        List<Position> deadEnds = halls(start, new ArrayList<>(), visited);
+        List<Position> deadEnds = halls(new Position(1, 1),
+                new ArrayList<>(), new boolean[WIDTH][HEIGHT]);
 
         //4. connect rooms and halls
         connectRoomsAndHalls(rooms);
