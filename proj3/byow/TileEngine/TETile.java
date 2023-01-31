@@ -10,13 +10,13 @@ import byow.Core.RandomUtils;
 /**
  * The TETile object is used to represent a single tile in your world. A 2D array of tiles make up a
  * board, and can be drawn to the screen using the TERenderer class.
- *
- * All TETile objects must have a character, textcolor, and background color to be used to represent
+ * <p>
+ * All TETile objects must have a character, text color, and background color to be used to represent
  * the tile when drawn to the screen. You can also optionally provide a path to an image file of an
  * appropriate size (16x16) to be drawn in place of the unicode representation. If the image path
- * provided cannot be found, draw will fallback to using the provided character and color
+ * provided cannot be found, draw will fall back to using the provided character and color
  * representation, so you are free to use image tiles on your own computer.
- *
+ * <p>
  * The provided TETile is immutable, i.e. none of its instance variables can change. You are welcome
  * to make your TETile class mutable, if you prefer.
  */
@@ -138,9 +138,8 @@ public class TETile {
     private static int newColorValue(int v, int dv, Random r) {
         int rawNewValue = v + RandomUtils.uniform(r, -dv, dv + 1);
 
-        // make sure value doesn't fall outside of the range 0 to 255.
-        int newValue = Math.min(255, Math.max(0, rawNewValue));
-        return newValue;
+        // make sure value doesn't fall outside the range 0 to 255.
+        return Math.min(255, Math.max(0, rawNewValue));
     }
 
     /**
@@ -190,10 +189,11 @@ public class TETile {
         return copy;
     }
 
-    @Override
-    /** Provides an equals method that is consistent
-     *  with the way that the autograder works.
+    /**
+     * Provides an equals method that is consistent
+     * with the way that the autograder works.
      */
+    @Override
     public boolean equals(Object x) {
         if (this == x) {
             return true;

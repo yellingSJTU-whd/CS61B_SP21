@@ -7,13 +7,12 @@ import edu.princeton.cs.introcs.StdDraw;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.FileNotFoundException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Random;
 import java.util.Arrays;
 import java.util.List;
@@ -24,20 +23,22 @@ public class Engine {
     /* Feel free to change the width and height. */
     public static final int WIDTH = 81;
     public static final int HEIGHT = 31;
-    private String operations;
+    private static final Path save = Paths.get("byow", "Core", "save.txt");
+    private StringBuilder operations;
     private Player player;
     private Random random;
     private TETile[][] theWorld;
     private List<Position> portals;
 
 
+
     private void newGame() {
-        operations = "";
-        operations += "N";
+        operations = new StringBuilder();
+        operations.append("N");
 
         promptToSeedUi();
         String seed = solicitSeed();
-        operations = operations + seed + "S";
+        operations.append(seed).append("S");
         saveOperations();
 
         theWorld = generateWorld(Long.parseLong(seed));
@@ -51,64 +52,63 @@ public class Engine {
     }
 
     private void loadGame() {
-        operations = loadOperations();
-        if (operations == null || operations.length() == 0) {
+        operations = new StringBuilder(loadOperations());
+        if (operations.length() == 0) {
             System.exit(0);
         }
-        theWorld = interactWithInputString(operations);
+        theWorld = interactWithInputString(String.valueOf(operations));
         StdDraw.setFont(new Font("Monaco", Font.BOLD, 14));
         ter.renderFrameWithShadow(theWorld, player.getPosition(), 15);
     }
 
     private void renderHUD(String gameInfo) {
-        int x = (int) StdDraw.mouseX();
-        int y = (int) StdDraw.mouseY();
-        String description = "";
+        var x = (int) StdDraw.mouseX();
+        var y = (int) StdDraw.mouseY();
+        var description = "";
+
         if (!new Position(x, y).outOf(theWorld)) {
             description = theWorld[x][y].description();
         }
-
         StdDraw.setFont(new Font("Monaco", Font.PLAIN, 25));
         StdDraw.setPenColor(Color.ORANGE);
-
         StdDraw.textLeft(0, HEIGHT + 1, description);
         StdDraw.text(WIDTH / 2.0, HEIGHT + 1, gameInfo);
-
         StdDraw.line(0, HEIGHT, WIDTH, HEIGHT);
 
         StdDraw.show();
     }
 
     private void repaintWall(Direction direction) {
-        int currX = player.getPosition().getX();
-        int currY = player.getPosition().getY();
+        var currX = player.getPosition().getX();
+        var currY = player.getPosition().getY();
         TETile wall;
         switch (direction) {
-            case UP:
+            case UP -> {
                 if (theWorld[currX][currY + 1].equals(Tileset.WALL)) {
                     wall = theWorld[currX][currY + 1];
                     theWorld[currX][currY + 1] = TETile.colorVariant(wall, 60, 60, 60, random);
                 }
-                break;
-            case DOWN:
+            }
+            case DOWN -> {
                 if (theWorld[currX][currY - 1].equals(Tileset.WALL)) {
                     wall = theWorld[currX][currY - 1];
                     theWorld[currX][currY - 1] = TETile.colorVariant(wall, 60, 60, 60, random);
                 }
-                break;
-            case LEFT:
+            }
+            case LEFT -> {
                 if (theWorld[currX - 1][currY].equals(Tileset.WALL)) {
                     wall = theWorld[currX - 1][currY];
                     theWorld[currX - 1][currY] = TETile.colorVariant(wall, 60, 60, 60, random);
                 }
-                break;
-            case RIGHT:
+            }
+            case RIGHT -> {
                 if (theWorld[currX + 1][currY].equals(Tileset.WALL)) {
                     wall = theWorld[currX + 1][currY];
                     theWorld[currX + 1][currY] = TETile.colorVariant(wall, 60, 60, 60, random);
                 }
-                break;
-            default:
+            }
+            default -> {
+            }
         }
     }
 
@@ -119,47 +119,47 @@ public class Engine {
             }
             char input = Character.toUpperCase(StdDraw.nextKeyTyped());
             switch (input) {
-                case 'W':
+                case 'W' -> {
                     if (player.moveNorth(theWorld)) {
-                        operations += "W";
+                        operations.append("W");
                         reDraw("went north");
                         handleTeleport();
                     } else {
                         reDraw("can't go north");
                         repaintWall(Direction.UP);
                     }
-                    break;
-                case 'A':
+                }
+                case 'A' -> {
                     if (player.moveWest(theWorld)) {
-                        operations += "A";
+                        operations.append("A");
                         reDraw("went west");
                         handleTeleport();
                     } else {
                         reDraw("can't go west");
                         repaintWall(Direction.LEFT);
                     }
-                    break;
-                case 'S':
+                }
+                case 'S' -> {
                     if (player.moveSouth(theWorld)) {
-                        operations += "S";
+                        operations.append("S");
                         reDraw("went south");
                         handleTeleport();
                     } else {
                         reDraw("can't go south");
                         repaintWall(Direction.DOWN);
                     }
-                    break;
-                case 'D':
+                }
+                case 'D' -> {
                     if (player.moveEast(theWorld)) {
-                        operations += "D";
+                        operations.append("D");
                         reDraw("went east");
                         handleTeleport();
                     } else {
                         reDraw("can't go east");
                         repaintWall(Direction.RIGHT);
                     }
-                    break;
-                case ':':
+                }
+                case ':' -> {
                     reDraw("waiting for keyboard input");
                     while (true) {
                         if (!StdDraw.hasNextKeyTyped()) {
@@ -173,8 +173,9 @@ public class Engine {
                         }
                         break;
                     }
-                    break;
-                default:
+                }
+                default -> {
+                }
             }
         }
     }
@@ -202,8 +203,8 @@ public class Engine {
     }
 
     private void repaint(Position position) {
-        int x = position.getX();
-        int y = position.getY();
+        var x = position.getX();
+        var y = position.getY();
         TETile tile = theWorld[x][y];
         theWorld[x][y] = TETile.colorVariant(tile, 60, 60, 60, random);
     }
@@ -220,49 +221,25 @@ public class Engine {
 
     private Long parseSeed(String interactions) {
         String upper = interactions.toUpperCase();
-        int indexOfN = upper.indexOf("N");
-        int indexOfS = upper.indexOf("S");
+        var indexOfN = upper.indexOf("N");
+        var indexOfS = upper.indexOf("S");
         return Long.parseLong(upper.substring(indexOfN + 1, indexOfS));
     }
 
     private String loadOperations() {
-        File f = new File("save.txt");
-        if (f.exists()) {
-            try {
-                FileInputStream fs = new FileInputStream(f);
-                ObjectInputStream os = new ObjectInputStream(fs);
-                String loadOperations = (String) os.readObject();
-                os.close();
-                return loadOperations;
-            } catch (FileNotFoundException e) {
-                System.out.println("file not found");
-                System.exit(0);
-            } catch (IOException e) {
-                System.out.println(e);
-                System.exit(0);
-            } catch (ClassNotFoundException e) {
-                System.out.println("class not found");
-                System.exit(0);
-            }
+        try {
+            return Files.readString(Paths.get("byow", "Core", "save.txt"));
+        } catch (IOException e) {
+            return "";
         }
-        return "";
     }
 
     private void saveOperations() {
-        File f = new File("save.txt");
-        try {
-            if (!f.exists()) {
-                f.createNewFile();
-            }
-            FileOutputStream fs = new FileOutputStream(f);
-            ObjectOutputStream os = new ObjectOutputStream(fs);
-            os.writeObject(operations);
-            os.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("file not found");
-            System.exit(0);
+        var path = Paths.get("byow", "Core", "save.txt");
+        try (var stream = new BufferedOutputStream(Files.newOutputStream(path))) {
+            stream.write(String.valueOf(operations).getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
             System.exit(0);
         }
     }
@@ -365,42 +342,43 @@ public class Engine {
      * playWithKeyboard. If the string ends in ":q", the same world should be returned as if the
      * string did not end with q. For example "n123sss" and "n123sss:q" should return the same
      * world. However, the behavior is slightly different. After playing with "n123sss:q", the game
-     * should save, and thus if we then called interactWithInputString with the string "l", we'd expect
-     * to get the exact same world back again, since this corresponds to loading the saved game.
+     * should save, and thus if we then called interactWithInputString with the string "l",
+     * we'd expect to get the exact same world back again, since this corresponds to
+     * loading the saved game.
      *
      * @param input the input string to feed to your program
      * @return the 2D TETile[][] representing the state of the world
      */
     public TETile[][] interactWithInputString(String input) {
-        String upper = input.toUpperCase();
-        int delimitation = upper.indexOf("S") + 1;
-        int quitIndex = upper.indexOf(":Q");
+        var upper = input.toUpperCase();
+        var delimitation = upper.indexOf("S") + 1;
+        var quitIndex = upper.indexOf(":Q");
+
         if (upper.startsWith("N")) {
             long seed = parseSeed(input);
-            operations = "N" + seed + "S";
-            saveOperations();
+            operations = new StringBuilder("N" + seed + "S");
             theWorld = generateWorld(seed);
             if (quitIndex >= 0) {
                 processMovementStr(upper.substring(delimitation, quitIndex));
-                saveOperations();
             } else {
                 processMovementStr(upper.substring(delimitation));
             }
+            saveOperations();
         } else if (upper.startsWith("L")) {
-            operations = loadOperations();
-            if (operations == null || operations.length() == 0) {
+            operations = new StringBuilder(loadOperations());
+            if (operations.length() == 0) {
                 System.exit(0);
             }
-            theWorld = interactWithInputString(operations);
+            theWorld = interactWithInputString(String.valueOf(operations));
             if (quitIndex >= 0) {
                 processMovementStr(upper.substring(1, quitIndex));
-                saveOperations();
                 System.exit(0);
             } else {
                 if (upper.length() > 1) {
                     processMovementStr(upper.substring(1));
                 }
             }
+            saveOperations();
         } else {
             throw new IllegalStateException("illegal input: " + input);
         }
@@ -412,40 +390,39 @@ public class Engine {
             return;
         }
         switch (movement.substring(0, 1)) {
-            case "W":
+            case "W" -> {
                 if (player.moveNorth(theWorld)) {
-                    operations += "W";
+                    operations.append("W");
                     if (atPortal()) {
                         teleport();
                     }
                 }
-                break;
-            case "A":
+            }
+            case "A" -> {
                 if (player.moveWest(theWorld)) {
-                    operations += "A";
+                    operations.append("A");
                     if (atPortal()) {
                         teleport();
                     }
                 }
-                break;
-            case "S":
+            }
+            case "S" -> {
                 if (player.moveSouth(theWorld)) {
-                    operations += "S";
+                    operations.append("S");
                     if (atPortal()) {
                         teleport();
                     }
                 }
-                break;
-            case "D":
+            }
+            case "D" -> {
                 if (player.moveEast(theWorld)) {
-                    operations += "D";
+                    operations.append("D");
                     if (atPortal()) {
                         teleport();
                     }
                 }
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + movement.charAt(0));
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + movement.charAt(0));
         }
         processMovementStr(movement.substring(1));
     }
@@ -455,7 +432,7 @@ public class Engine {
      *
      * @param seed pseudo-random seed
      * @return the world generated
-     * @source https://zhuanlan.zhihu.com/p/27381213
+     * @source <a href="https://zhuanlan.zhihu.com/p/27381213">...</a>
      */
     private TETile[][] generateWorld(long seed) {
         //1. init
@@ -496,14 +473,14 @@ public class Engine {
     }
 
     private void setPortals() {
-        int numOfPortals = 4;
+        var numOfPortals = 4;
         portals = new ArrayList<>(numOfPortals);
         while (portals.size() < numOfPortals) {
-            int x = RandomUtils.uniform(random, 1, WIDTH);
-            int y = RandomUtils.uniform(random, 1, HEIGHT);
+            var x = RandomUtils.uniform(random, 1, WIDTH);
+            var y = RandomUtils.uniform(random, 1, HEIGHT);
             if (theWorld[x][y].equals(Tileset.FLOOR)) {
                 theWorld[x][y] = Tileset.IN;
-                Position portal = new Position(x, y);
+                var portal = new Position(x, y);
                 portals.add(portal);
             }
         }
@@ -518,13 +495,13 @@ public class Engine {
     }
 
     private void repaint(Room room) {
-        int xStart = room.getButtonLeft().getX();
-        int xEnd = room.getTopRight().getX();
-        int yStart = room.getButtonLeft().getY();
-        int yEnd = room.getTopRight().getY();
+        var xStart = room.getButtonLeft().getX();
+        var xEnd = room.getTopRight().getX();
+        var yStart = room.getButtonLeft().getY();
+        var yEnd = room.getTopRight().getY();
 
-        for (int x = xStart; x <= xEnd; x++) {
-            for (int y = yStart; y <= yEnd; y++) {
+        for (var x = xStart; x <= xEnd; x++) {
+            for (var y = yStart; y <= yEnd; y++) {
                 theWorld[x][y] = Tileset.FLOOR;
             }
         }
@@ -533,9 +510,9 @@ public class Engine {
     private void setBeginning() {
         Position beginning = null;
         while (beginning == null) {
-            int x = RandomUtils.uniform(random, 1, WIDTH);
-            int y = RandomUtils.uniform(random, 1, HEIGHT);
-            Position candidate = new Position(x, y);
+            var x = RandomUtils.uniform(random, 1, WIDTH);
+            var y = RandomUtils.uniform(random, 1, HEIGHT);
+            var candidate = new Position(x, y);
             List<Position> walls = candidate.oddNeighbours(theWorld, Tileset.WALL);
             if (theWorld[x][y].equals(Tileset.FLOOR) && walls.size() > 0) {
                 beginning = walls.get(RandomUtils.uniform(random, walls.size()));
@@ -546,8 +523,8 @@ public class Engine {
     }
 
     private void generateWalls() {
-        for (int x = 0; x < theWorld.length; x++) {
-            for (int y = 0; y < theWorld[0].length; y++) {
+        for (var x = 0; x < theWorld.length; x++) {
+            for (var y = 0; y < theWorld[0].length; y++) {
                 if (isWall(x, y)) {
                     theWorld[x][y] = TETile.colorVariant(Tileset.WALL, 30, 30, 30, random);
                 }
@@ -559,7 +536,7 @@ public class Engine {
         if (!theWorld[x][y].equals(Tileset.NOTHING)) {
             return false;
         }
-        Position current = new Position(x, y);
+        var current = new Position(x, y);
         List<Position> floors = current.diagonalNeighbours(theWorld, Tileset.FLOOR);
         List<Position> rooms = current.diagonalNeighbours(theWorld, Tileset.ROOM);
         return floors.size() + rooms.size() > 0;
@@ -569,7 +546,7 @@ public class Engine {
         if (deadEnds == null || deadEnds.size() == 0) {
             return;
         }
-        for (Position deadEnd : deadEnds) {
+        deadEnds.forEach(deadEnd -> {
             List<Position> neighbours = deadEnd.oddNeighbours(theWorld, Tileset.FLOOR);
             if (neighbours.size() == 1 && RandomUtils.bernoulli(random, 0.985)) {
                 theWorld[deadEnd.getX()][deadEnd.getY()] = Tileset.NOTHING;
@@ -577,7 +554,7 @@ public class Engine {
             } else if (deadEnd.oddNeighbours(theWorld, Tileset.FLOOR).size() == 1) {
                 newEnds.add(deadEnd);
             }
-        }
+        });
     }
 
 
@@ -588,8 +565,8 @@ public class Engine {
     }
 
     private void connectRoomsAndHalls(Room room) {
-        Position buttonRight = new Position(room.getTopRight().getX(), room.getButtonLeft().getY());
-        Position topLeft = new Position(room.getButtonLeft().getX(), room.getTopRight().getY());
+        var buttonRight = new Position(room.getTopRight().getX(), room.getButtonLeft().getY());
+        var topLeft = new Position(room.getButtonLeft().getX(), room.getTopRight().getY());
 
         connectRoomsAndHalls(room.getButtonLeft(), buttonRight, Direction.DOWN);
         connectRoomsAndHalls(room.getButtonLeft(), topLeft, Direction.LEFT);
@@ -602,8 +579,8 @@ public class Engine {
         Position connector, candidate;
 
         if (direction.equals(Direction.DOWN) || direction.equals(Direction.UP)) {
-            int y = direction.equals(Direction.DOWN) ? start.getY() - 2 : start.getY() + 2;
-            for (int x = start.getX(); x <= end.getX(); x++) {
+            var y = direction.equals(Direction.DOWN) ? start.getY() - 2 : start.getY() + 2;
+            for (var x = start.getX(); x <= end.getX(); x++) {
                 candidate = new Position(x, y);
                 if (!candidate.outOf(theWorld) && theWorld[x][y].equals(Tileset.FLOOR)) {
                     candidates.add(candidate);
@@ -612,13 +589,13 @@ public class Engine {
 
             connector = connector(candidates);
             if (connector != null) {
-                int yPrim = y < start.getY() ? y + 1 : y - 1;
+                var yPrim = y < start.getY() ? y + 1 : y - 1;
                 theWorld[connector.getX()][yPrim] =
                         TETile.colorVariant(Tileset.FLOOR, 30, 30, 30, random);
             }
         } else {
-            int connectorX = direction.equals(Direction.LEFT) ? start.getX() - 2 : start.getX() + 2;
-            for (int y = start.getY(); y <= end.getY(); y++) {
+            var connectorX = direction.equals(Direction.LEFT) ? start.getX() - 2 : start.getX() + 2;
+            for (var y = start.getY(); y <= end.getY(); y++) {
                 candidate = new Position(connectorX, y);
                 if (!candidate.outOf(theWorld) && theWorld[connectorX][y].equals(Tileset.FLOOR)) {
                     candidates.add(candidate);
@@ -627,7 +604,7 @@ public class Engine {
 
             connector = connector(candidates);
             if (connector != null) {
-                int bridgeX = connectorX < start.getX() ? connectorX + 1 : connectorX - 1;
+                var bridgeX = connectorX < start.getX() ? connectorX + 1 : connectorX - 1;
                 theWorld[bridgeX][connector.getY()] =
                         TETile.colorVariant(Tileset.FLOOR, 30, 30, 30, random);
             }
@@ -637,7 +614,7 @@ public class Engine {
     private Position connector(List<Position> candidates) {
         Position connector = null;
         if (candidates.size() != 0 && RandomUtils.bernoulli(random, 0.7)) {
-            int luckyNum = RandomUtils.uniform(random, candidates.size());
+            var luckyNum = RandomUtils.uniform(random, candidates.size());
             connector = candidates.get(luckyNum);
         }
         return connector;
@@ -657,7 +634,7 @@ public class Engine {
         }
 
         while (neighbours.size() > 0) {
-            int randomIndex = RandomUtils.uniform(random, neighbours.size());
+            var randomIndex = RandomUtils.uniform(random, neighbours.size());
             Position neighbour = neighbours.remove(randomIndex);
             if (!visited[neighbour.getX()][neighbour.getY()]) {
                 connectPositions(start, neighbour);
@@ -669,8 +646,8 @@ public class Engine {
     }
 
     private void connectPositions(Position start, Position neighbour) {
-        int connectorX = (start.getX() + neighbour.getX()) / 2;
-        int connectorY = (start.getY() + neighbour.getY()) / 2;
+        var connectorX = (start.getX() + neighbour.getX()) / 2;
+        var connectorY = (start.getY() + neighbour.getY()) / 2;
 
         theWorld[neighbour.getX()][neighbour.getY()] =
                 TETile.colorVariant(Tileset.FLOOR, 30, 30, 30, random);
@@ -680,7 +657,7 @@ public class Engine {
 
     private List<Room> generateRooms() {
         List<Room> rooms = new ArrayList<>();
-        int roomNums = RandomUtils.uniform(random, 8, 13);
+        var roomNums = RandomUtils.uniform(random, 8, 13);
         while (rooms.size() < roomNums) {
             Room newRoom = Room.randomRoom(random, theWorld);
             if (!newRoom.overLap(rooms) && !newRoom.adjacent(rooms)) {
@@ -692,12 +669,12 @@ public class Engine {
     }
 
     private void fillWithRoomTile(Room room) {
-        int xStart = room.getButtonLeft().getX();
-        int xEnd = room.getTopRight().getX();
-        int yStart = room.getButtonLeft().getY();
-        int yEnd = room.getTopRight().getY();
+        var xStart = room.getButtonLeft().getX();
+        var xEnd = room.getTopRight().getX();
+        var yStart = room.getButtonLeft().getY();
+        var yEnd = room.getTopRight().getY();
 
-        for (int x = xStart; x < xEnd + 1; x++) {
+        for (var x = xStart; x < xEnd + 1; x++) {
             TETile[] column = theWorld[x];
             Arrays.fill(column, yStart, yEnd + 1,
                     TETile.colorVariant(Tileset.ROOM, 30, 30, 30, random));

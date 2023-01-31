@@ -31,27 +31,20 @@ public class Player {
     }
 
     private boolean move(TETile[][] theWorld, Direction direction) {
-        int currentX = position.getX();
-        int currentY = position.getY();
-        int width = theWorld.length;
-        int height = theWorld[0].length;
-        int xPrim = currentX;
-        int yPrim = currentY;
+        var currentX = position.getX();
+        var currentY = position.getY();
+        var width = theWorld.length;
+        var height = theWorld[0].length;
+        var xPrim = currentX;
+        var yPrim = currentY;
 
         switch (direction) {
-            case UP:
-                yPrim++;
-                break;
-            case LEFT:
-                xPrim--;
-                break;
-            case DOWN:
-                yPrim--;
-                break;
-            case RIGHT:
-                xPrim++;
-                break;
-            default:
+            case UP -> yPrim++;
+            case LEFT -> xPrim--;
+            case DOWN -> yPrim--;
+            case RIGHT -> xPrim++;
+            default -> {
+            }
         }
 
         if (xPrim <= 0 || xPrim >= width || yPrim < 0 || yPrim >= height
@@ -77,8 +70,8 @@ public class Player {
     }
 
     public void moveTo(TETile[][] theWorld, Position destination) {
-        int x = destination.getX();
-        int y = destination.getY();
+        var x = destination.getX();
+        var y = destination.getY();
         position = new Position(x, y);
         if (theWorld[x][y].equals(Tileset.IN)) {
             theWorld[x][y] = Tileset.OUT;

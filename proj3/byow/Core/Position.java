@@ -44,9 +44,10 @@ public class Position {
     }
 
     public boolean outOf(TETile[][] theWorld) {
-        int width = theWorld.length;
-        int height = theWorld[0].length;
-        return (x <= 0 || x >= width || y <= 0 || y >= height);
+        return (x <= 0
+                || x >= theWorld.length
+                || y <= 0
+                || y >= theWorld[0].length);
     }
 
     public List<Position> oddNeighbours(TETile[][] theWorld, TETile neighbourType) {
@@ -60,19 +61,19 @@ public class Position {
 
     private List<Position> neighbours(TETile[][] tiles, TETile type, boolean even, boolean across) {
         List<Position> neighbours = new ArrayList<>(4);
-        int width = tiles.length;
-        int height = tiles[0].length;
-        int delta = even ? 2 : 1;
+        var width = tiles.length;
+        var height = tiles[0].length;
+        var delta = even ? 2 : 1;
 
-        Position left = new Position(x - delta, y);
-        Position right = new Position(x + delta, y);
-        Position top = new Position(x, y + delta);
-        Position button = new Position(x, y - delta);
+        var left = new Position(x - delta, y);
+        var right = new Position(x + delta, y);
+        var top = new Position(x, y + delta);
+        var button = new Position(x, y - delta);
 
-        Position topLeft = new Position(x - delta, y + delta);
-        Position topRight = new Position(x + delta, y + delta);
-        Position buttonLeft = new Position(x - delta, y - delta);
-        Position buttonRight = new Position(x + delta, y - delta);
+        var topLeft = new Position(x - delta, y + delta);
+        var topRight = new Position(x + delta, y + delta);
+        var buttonLeft = new Position(x - delta, y - delta);
+        var buttonRight = new Position(x + delta, y - delta);
 
         if (x > delta && left.belongsTo(tiles, type)) {
             neighbours.add(left);
@@ -87,19 +88,20 @@ public class Position {
             neighbours.add(top);
         }
 
-        if (across) {
-            if (x > delta && y > delta && buttonLeft.belongsTo(tiles, type)) {
-                neighbours.add(buttonLeft);
-            }
-            if (x < width - delta && y > delta && buttonRight.belongsTo(tiles, type)) {
-                neighbours.add(buttonRight);
-            }
-            if (x > delta && y < height - delta && topLeft.belongsTo(tiles, type)) {
-                neighbours.add(topLeft);
-            }
-            if (x < width - delta && y < height - delta && topRight.belongsTo(tiles, type)) {
-                neighbours.add(topRight);
-            }
+        if (!across) {
+            return neighbours;
+        }
+        if (x > delta && y > delta && buttonLeft.belongsTo(tiles, type)) {
+            neighbours.add(buttonLeft);
+        }
+        if (x < width - delta && y > delta && buttonRight.belongsTo(tiles, type)) {
+            neighbours.add(buttonRight);
+        }
+        if (x > delta && y < height - delta && topLeft.belongsTo(tiles, type)) {
+            neighbours.add(topLeft);
+        }
+        if (x < width - delta && y < height - delta && topRight.belongsTo(tiles, type)) {
+            neighbours.add(topRight);
         }
 
         return neighbours;
