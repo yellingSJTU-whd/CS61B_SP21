@@ -8,17 +8,18 @@ import edu.princeton.cs.introcs.StdDraw;
 import byow.Core.RandomUtils;
 
 /**
- * The TETile object is used to represent a single tile in your world. A 2D array of tiles make up a
- * board, and can be drawn to the screen using the TERenderer class.
+ * The TETile object is used to represent a single tile in your world. A 2D array of tiles
+ * make up a board, and can be drawn to the screen using the TERenderer class.
  * <p>
- * All TETile objects must have a character, text color, and background color to be used to represent
- * the tile when drawn to the screen. You can also optionally provide a path to an image file of an
- * appropriate size (16x16) to be drawn in place of the unicode representation. If the image path
- * provided cannot be found, draw will fall back to using the provided character and color
- * representation, so you are free to use image tiles on your own computer.
+ * All TETile objects must have a character, text color, and background color to be used
+ * to represent the tile when drawn to the screen. You can also optionally provide a path
+ * to an image file of an appropriate size (16x16) to be drawn in place of the unicode
+ * representation. If the image path provided cannot be found, draw will fall back to
+ * using the provided character and color representation, so you are free to use image
+ * tiles on your own computer.
  * <p>
- * The provided TETile is immutable, i.e. none of its instance variables can change. You are welcome
- * to make your TETile class mutable, if you prefer.
+ * The provided TETile is immutable, i.e. none of its instance variables can change.
+ * You are welcome to make your TETile class mutable, if you prefer.
  */
 
 public class TETile {
