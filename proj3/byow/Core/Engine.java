@@ -350,35 +350,34 @@ public class Engine {
      */
     public TETile[][] interactWithInputString(String input) {
         var upper = input.toUpperCase();
-        var delimitation = upper.indexOf("S") + 1;
-        var quitIndex = upper.indexOf(":Q");
-
         if (upper.startsWith("N")) {
             var seed = parseSeed(input);
             operations = new StringBuilder("N" + seed + "S");
             theWorld = generateWorld(seed);
-            if (quitIndex >= 0) {
-                processMovementStr(upper.substring(delimitation, quitIndex));
-            } else {
-                processMovementStr(upper.substring(delimitation));
-            }
-            saveOperations();
+            interactWith(upper);
         } else if (upper.startsWith("L")) {
             operations = new StringBuilder(loadOperations());
             if (operations.length() == 0) {
                 System.exit(0);
             }
             theWorld = interactWithInputString(String.valueOf(operations));
-            if (quitIndex >= 0) {
-                processMovementStr(upper.substring(1, quitIndex));
-            } else if (upper.length() > 1) {
-                processMovementStr(upper.substring(1));
-            }
-            saveOperations();
+            interactWith(upper);
         } else {
             throw new IllegalStateException("illegal input: " + input);
         }
         return theWorld;
+    }
+
+    private void interactWith(String upper) {
+        var delimitation = upper.indexOf("S") + 1;
+        var quitIndex = upper.indexOf(":Q");
+
+        if (quitIndex >= 0) {
+            processMovementStr(upper.substring(delimitation, quitIndex));
+        } else {
+            processMovementStr(upper.substring(delimitation));
+        }
+        saveOperations();
     }
 
     private void processMovementStr(String movement) {
@@ -482,10 +481,8 @@ public class Engine {
     }
 
     private void repaint(List<Room> rooms) {
-        if (rooms != null && rooms.size() != 0) {
-            for (Room room : rooms) {
-                repaint(room);
-            }
+        if (rooms != null) {
+            rooms.forEach(this::repaint);
         }
     }
 
@@ -520,9 +517,10 @@ public class Engine {
     private void generateWalls() {
         for (var x = 0; x < theWorld.length; x++) {
             for (var y = 0; y < theWorld[0].length; y++) {
-                if (isWall(x, y)) {
-                    theWorld[x][y] = TETile.colorVariant(Tileset.WALL, 30, 30, 30, random);
+                if (!isWall(x, y)) {
+                    continue;
                 }
+                theWorld[x][y] = TETile.colorVariant(Tileset.WALL, 30, 30, 30, random);
             }
         }
     }
@@ -554,9 +552,7 @@ public class Engine {
 
 
     private void connectRoomsAndHalls(List<Room> rooms) {
-        for (Room room : rooms) {
-            connectRoomsAndHalls(room);
-        }
+        rooms.forEach(this::connectRoomsAndHalls);
     }
 
     private void connectRoomsAndHalls(Room room) {
@@ -621,7 +617,7 @@ public class Engine {
             return deadEnds;
         }
         visited[start.getX()][start.getY()] = true;
-        List<Position> neighbours = start.evenNeighbours(theWorld, Tileset.NOTHING);
+        var neighbours = start.evenNeighbours(theWorld, Tileset.NOTHING);
 
         if (neighbours.size() == 0) {
             deadEnds.add(start);
@@ -654,7 +650,7 @@ public class Engine {
         List<Room> rooms = new ArrayList<>();
         var roomNums = RandomUtils.uniform(random, 8, 13);
         while (rooms.size() < roomNums) {
-            Room newRoom = Room.randomRoom(random, theWorld);
+            var newRoom = Room.randomRoom(random, theWorld);
             if (!newRoom.overLap(rooms) && !newRoom.adjacent(rooms)) {
                 rooms.add(newRoom);
                 fillWithRoomTile(newRoom);

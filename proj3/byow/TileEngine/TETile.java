@@ -76,7 +76,7 @@ public class TETile {
      * Draws the tile to the screen at location x, y. If a valid filepath is provided,
      * we draw the image located at that filepath to the screen. Otherwise, we fall
      * back to the character and color representation for the tile.
-     *
+     * <p>
      * Note that the image provided must be of the right size (16x16). It will not be
      * automatically resized or truncated.
      * @param x x coordinate
@@ -127,17 +127,17 @@ public class TETile {
      */
     public static TETile colorVariant(TETile t, int dr, int dg, int db, Random r) {
         Color oldColor = t.textColor;
-        int newRed = newColorValue(oldColor.getRed(), dr, r);
-        int newGreen = newColorValue(oldColor.getGreen(), dg, r);
-        int newBlue = newColorValue(oldColor.getBlue(), db, r);
+        var newRed = newColorValue(oldColor.getRed(), dr, r);
+        var newGreen = newColorValue(oldColor.getGreen(), dg, r);
+        var newBlue = newColorValue(oldColor.getBlue(), db, r);
 
-        Color c = new Color(newRed, newGreen, newBlue);
+        var c = new Color(newRed, newGreen, newBlue);
 
         return new TETile(t, c);
     }
 
     private static int newColorValue(int v, int dv, Random r) {
-        int rawNewValue = v + RandomUtils.uniform(r, -dv, dv + 1);
+        var rawNewValue = v + RandomUtils.uniform(r, -dv, dv + 1);
 
         // make sure value doesn't fall outside the range 0 to 255.
         return Math.min(255, Math.max(0, rawNewValue));
@@ -153,12 +153,12 @@ public class TETile {
      * @return string representation of the world
      */
     public static String toString(TETile[][] world) {
-        int width = world.length;
-        int height = world[0].length;
+        var width = world.length;
+        var height = world[0].length;
         StringBuilder sb = new StringBuilder();
 
-        for (int y = height - 1; y >= 0; y -= 1) {
-            for (int x = 0; x < width; x += 1) {
+        for (var y = height - 1; y >= 0; y -= 1) {
+            for (var x = 0; x < width; x += 1) {
                 if (world[x][y] == null) {
                     throw new IllegalArgumentException("Tile at position x=" + x + ", y=" + y
                             + " is null.");
@@ -179,10 +179,9 @@ public class TETile {
             return null;
         }
 
-        TETile[][] copy = new TETile[tiles.length][];
-
-        int i = 0;
-        for (TETile[] column : tiles) {
+        var copy = new TETile[tiles.length][];
+        var i = 0;
+        for (var column : tiles) {
             copy[i] = Arrays.copyOf(column, column.length);
             i += 1;
         }
