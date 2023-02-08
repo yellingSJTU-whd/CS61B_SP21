@@ -117,7 +117,7 @@ public class Engine {
             if (!StdDraw.hasNextKeyTyped()) {
                 continue;
             }
-            char input = Character.toUpperCase(StdDraw.nextKeyTyped());
+            var input = Character.toUpperCase(StdDraw.nextKeyTyped());
             switch (input) {
                 case 'W' -> {
                     if (player.moveNorth(theWorld)) {
@@ -191,10 +191,10 @@ public class Engine {
     }
 
     private void teleport() {
-        Position current = player.getPosition();
+        var current = player.getPosition();
         Position destination = null;
         while (destination == null) {
-            Position candidate = portals.get(RandomUtils.uniform(random, portals.size()));
+            var candidate = portals.get(RandomUtils.uniform(random, portals.size()));
             if (!candidate.equals(current)) {
                 destination = candidate;
             }
@@ -205,6 +205,7 @@ public class Engine {
     private void repaint(Position position) {
         var x = position.getX();
         var y = position.getY();
+
         TETile tile = theWorld[x][y];
         theWorld[x][y] = TETile.colorVariant(tile, 60, 60, 60, random);
     }
@@ -323,20 +324,22 @@ public class Engine {
         //2. wait for and read input(only N、L、Q is valid)
         String beginningStr = solicitBeginningStr();
 
-        if (beginningStr.equals("N")) {
-            newGame();
-        } else if (beginningStr.equals("L")) {
-            loadGame();
-            interact();
-        } else {
-            saveOperations();
-            System.exit(0);
+        switch (beginningStr) {
+            case "N" -> newGame();
+            case "L" -> {
+                loadGame();
+                interact();
+            }
+            default -> {
+                saveOperations();
+                System.exit(0);
+            }
         }
     }
 
     /**
      * Method used for autograding and testing the game code. The input string will be a series
-     * of characters (for example, "n123sswwdasdassadwas", "n123sss:q", "lwww". The game should
+     * of characters (for example, "n123sswwdasdassadwas", "n123sss:q", "lwww"). The game should
      * behave exactly as if the user typed these characters into the game after playing
      * playWithKeyboard. If the string ends in ":q", the same world should be returned as if the
      * string did not end with q. For example "n123sss" and "n123sss:q" should return the same
@@ -432,17 +435,17 @@ public class Engine {
     private TETile[][] generateWorld(long seed) {
         //1. init
         theWorld = new TETile[WIDTH][HEIGHT];
-        for (TETile[] column : theWorld) {
+        for (var column : theWorld) {
             Arrays.fill(column, Tileset.NOTHING);
         }
         random = new Random(seed);
 
         //2. generate rooms pseudo-randomly
-        List<Room> rooms = generateRooms();
+        var rooms = generateRooms();
 
         //3. generate halls from button left of the map
         theWorld[1][1] = Tileset.FLOOR;
-        List<Position> deadEnds = halls(new Position(1, 1),
+        var deadEnds = halls(new Position(1, 1),
                 new ArrayList<>(), new boolean[WIDTH][HEIGHT]);
 
         //4. connect rooms and halls
@@ -505,7 +508,7 @@ public class Engine {
             var x = RandomUtils.uniform(random, 1, WIDTH);
             var y = RandomUtils.uniform(random, 1, HEIGHT);
             var candidate = new Position(x, y);
-            List<Position> walls = candidate.oddNeighbours(theWorld, Tileset.WALL);
+            var walls = candidate.oddNeighbours(theWorld, Tileset.WALL);
             if (theWorld[x][y].equals(Tileset.FLOOR) && walls.size() > 0) {
                 beginning = walls.get(RandomUtils.uniform(random, walls.size()));
             }
@@ -530,8 +533,8 @@ public class Engine {
             return false;
         }
         var current = new Position(x, y);
-        List<Position> floors = current.diagonalNeighbours(theWorld, Tileset.FLOOR);
-        List<Position> rooms = current.diagonalNeighbours(theWorld, Tileset.ROOM);
+        var floors = current.diagonalNeighbours(theWorld, Tileset.FLOOR);
+        var rooms = current.diagonalNeighbours(theWorld, Tileset.ROOM);
         return floors.size() + rooms.size() > 0;
     }
 
@@ -540,7 +543,7 @@ public class Engine {
             return;
         }
         deadEnds.forEach(deadEnd -> {
-            List<Position> neighbours = deadEnd.oddNeighbours(theWorld, Tileset.FLOOR);
+            var neighbours = deadEnd.oddNeighbours(theWorld, Tileset.FLOOR);
             if (neighbours.size() == 1 && RandomUtils.bernoulli(random, 0.985)) {
                 theWorld[deadEnd.getX()][deadEnd.getY()] = Tileset.NOTHING;
                 removeDeadEnds(neighbours, newEnds);
@@ -651,10 +654,11 @@ public class Engine {
         var roomNums = RandomUtils.uniform(random, 8, 13);
         while (rooms.size() < roomNums) {
             var newRoom = Room.randomRoom(random, theWorld);
-            if (!newRoom.overLap(rooms) && !newRoom.adjacent(rooms)) {
-                rooms.add(newRoom);
-                fillWithRoomTile(newRoom);
+            if (newRoom.overLap(rooms) || newRoom.adjacent(rooms)) {
+                continue;
             }
+            rooms.add(newRoom);
+            fillWithRoomTile(newRoom);
         }
         return rooms;
     }

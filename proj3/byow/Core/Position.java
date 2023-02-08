@@ -30,13 +30,14 @@ public class Position {
         if (!(o instanceof Position)) {
             return false;
         }
-        Position another = (Position) o;
+
+        var another = (Position) o;
         return x == another.getX() && y == another.getY();
     }
 
     @Override
     public int hashCode() {
-        return Integer.hashCode(x) + Integer.hashCode(y);
+        return Integer.hashCode(x) ^ Integer.hashCode(y);
     }
 
     public boolean belongsTo(TETile[][] theWorld, TETile type) {

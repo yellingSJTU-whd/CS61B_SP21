@@ -33,8 +33,6 @@ public class Player {
     private boolean move(TETile[][] theWorld, Direction direction) {
         var currentX = position.getX();
         var currentY = position.getY();
-        var width = theWorld.length;
-        var height = theWorld[0].length;
         var xPrim = currentX;
         var yPrim = currentY;
 
@@ -47,7 +45,10 @@ public class Player {
             }
         }
 
-        if (xPrim <= 0 || xPrim >= width || yPrim < 0 || yPrim >= height
+        if (xPrim <= 0
+                || xPrim >= theWorld.length
+                || yPrim < 0
+                || yPrim >= theWorld[0].length
                 || !(theWorld[xPrim][yPrim].equals(Tileset.FLOOR)
                 || theWorld[xPrim][yPrim].equals(Tileset.IN))) {
             return false;
@@ -72,6 +73,7 @@ public class Player {
     public void moveTo(TETile[][] theWorld, Position destination) {
         var x = destination.getX();
         var y = destination.getY();
+
         position = new Position(x, y);
         if (theWorld[x][y].equals(Tileset.IN)) {
             theWorld[x][y] = Tileset.OUT;
